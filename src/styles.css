@@ -1,1 +1,91 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Outfit:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+
+  --color-primary: #224064;
+  --color-primary-dark: #1a324e;
+  --color-secondary: var(--color-slate-900);
+  --color-accent: var(--color-amber-400);
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+  }
+  @keyframes marquee2 {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(0); }
+  }
+
+  --animate-marquee: marquee 30s linear infinite;
+  --animate-marquee2: marquee2 30s linear infinite;
+}
+
+@layer base {
+  body {
+    @apply font-sans;
+    background-color: var(--color-white);
+    color: var(--color-slate-900);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .dark body {
+    background-color: var(--color-slate-900);
+    color: var(--color-slate-100);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-bold tracking-tight;
+  }
+}
+
+/* Global Dark Mode Overrides for Hardcoded Utility Classes */
+.dark .bg-white {
+  background-color: var(--color-slate-900);
+}
+.dark .bg-slate-50 {
+  background-color: var(--color-slate-800);
+}
+.dark .border-slate-100 {
+  border-color: var(--color-slate-800);
+}
+.dark .border-slate-200 {
+  border-color: var(--color-slate-700);
+}
+.dark .text-secondary {
+  color: var(--color-white);
+}
+.dark .text-slate-400 {
+  color: var(--color-slate-500);
+}
+.dark .text-slate-500 {
+  color: var(--color-slate-400);
+}
+.dark .text-slate-600 {
+  color: var(--color-slate-300);
+}
+.dark .shadow-xs, .dark .shadow-sm, .dark .shadow-md, .dark .shadow-lg, .dark .shadow-xl, .dark .shadow-2xl {
+  box-shadow: none;
+  border: 1px solid var(--color-slate-800);
+}
+.dark input, .dark textarea, .dark select {
+  background-color: var(--color-slate-800);
+  border-color: var(--color-slate-700);
+  color: var(--color-white);
+}
+.dark input:focus, .dark textarea:focus, .dark select:focus {
+  border-color: var(--color-primary);
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

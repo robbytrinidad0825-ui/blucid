@@ -1,0 +1,63 @@
+[debug] [2026-04-27T16:12:29.531Z] ----------------------------------------------------------------------
+[debug] [2026-04-27T16:12:29.533Z] Command:       /nix/store/b3x7xvp565xqlj0whi2giwgbrplfwfpb-nodejs-22.16.0/bin/node /home/user/.global_modules/bin/firebase init hosting
+[debug] [2026-04-27T16:12:29.534Z] CLI Version:   15.15.0
+[debug] [2026-04-27T16:12:29.534Z] Platform:      linux
+[debug] [2026-04-27T16:12:29.534Z] Node Version:  v22.16.0
+[debug] [2026-04-27T16:12:29.534Z] Time:          Mon Apr 27 2026 16:12:29 GMT+0000 (Coordinated Universal Time)
+[debug] [2026-04-27T16:12:29.535Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-04-27T16:12:31.045Z] Checked if tokens are valid: true, expires at: 1777308955450
+[debug] [2026-04-27T16:12:31.045Z] Checked if tokens are valid: true, expires at: 1777308955450
+[debug] [2026-04-27T16:12:31.049Z] >>> [apiv2][query] GET https://monospace-pa.googleapis.com/v1/workspaces/blucid-inc-46086693 [none]
+[debug] [2026-04-27T16:12:32.286Z] <<< [apiv2][status] GET https://monospace-pa.googleapis.com/v1/workspaces/blucid-inc-46086693 200
+[debug] [2026-04-27T16:12:32.286Z] <<< [apiv2][body] GET https://monospace-pa.googleapis.com/v1/workspaces/blucid-inc-46086693 {"workspaceId":"blucid-inc-46086693","name":"blucid-inc","workspaceRedirectUrl":"firebase-blucid-inc-1777147835947.cluster-52r6vzs3ujeoctkkxpjif3x34a.cloudworkstations.dev","status":"WORKSPACE_STATUS_RUNNING","lastAccessDatetime":"2026-04-27T12:11:07.215914Z","workspaceTemplate":"WORKSPACE_TEMPLATE_BLANK_WEB","owner":"SELF","serviceAccountEmail":"msp-4843887663893128648@monospace-per-ws-sa-8.iam.gserviceaccount.com","enableNix":true,"ownerEmail":"robbytrinidad0825@gmail.com","workspaceImageUrl":"https://www.gstatic.com/monospace/231115/logo_angular.svg","templateArgs":"{\"__agentic_workspace\":true}","templateRepoUrl":"file:///usr/local/monospace/templates/public/angular","workstationAccessToken":"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2Nsb3VkLmdvb2dsZS5jb20vd29ya3N0YXRpb25zIiwiYXVkIjoiZmlyZWJhc2UtYmx1Y2lkLWluYy0xNzc3MTQ3ODM1OTQ3LmNsdXN0ZXItNTJyNnZ6czN1amVvY3Rra3hwamlmM3gzNGEuY2xvdWR3b3Jrc3RhdGlvbnMuZGV2IiwiaWF0IjoxNzc3MzA2MzUyLCJleHAiOjE3NzczOTI3NTF9.BI8OvhO_2zhdkqbfWxQOhU1lFDRT03CYcWDGjHCk6JeuKYmIEUGC_0QzHvSM-TeNvn-fRMmlr5JLDzBhzim4AdgIOrXTU3MO1y1lRsmLG3cARSh7uHvhIbxJEItNS2ufbwUgAgurd1c4nkDtrThl62n0DSV-hVzRSXkVGucLBwFgrb0vyxFVlD4Ar8hTR9VyuWeHp67eEPlzfrIFZrm-MmsHkSCYiYO9zJwqfW8zDaHagaWzkOXjKfhSRPGA3iLXSDbGe8o24sypjXmDpsYlma1-Yxp58H7IVJIQgML0162K3fyRW-UXLk7Xibi9gX_N5BmaChfjtMcV6YcP0Osn1A","firebaseProjectId":"gen-lang-client-0164208100"}
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  /home/user/blucid-inc
+
+Before we get started, keep in mind:
+
+  * You are initializing within an existing Firebase project directory
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] 
+[debug] [2026-04-27T16:12:32.295Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-04-27T16:12:32.296Z] > authorizing via signed-in user (robbytrinidad0825@gmail.com)
+[debug] [2026-04-27T16:12:32.298Z] Checked if tokens are valid: true, expires at: 1777308955450
+[debug] [2026-04-27T16:12:32.298Z] Checked if tokens are valid: true, expires at: 1777308955450
+[debug] [2026-04-27T16:12:32.299Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/gen-lang-client-0164208100 [none]
+[debug] [2026-04-27T16:12:32.583Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/gen-lang-client-0164208100 200
+[debug] [2026-04-27T16:12:32.584Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/gen-lang-client-0164208100 {"projectId":"gen-lang-client-0164208100","projectNumber":"913412574312","displayName":"blucid","name":"projects/gen-lang-client-0164208100","resources":{"hostingSite":"gen-lang-client-0164208100","realtimeDatabaseInstance":"gen-lang-client-0164208100-default-rtdb"},"state":"ACTIVE","etag":"1_358d23d5-ce7e-41bf-8808-89ffe5d76571"}
+[info] i  Using project gen-lang-client-0164208100 (blucid) . 
+[info] 
+=== Hosting Setup
+[info] 
+[debug] [2026-04-27T16:12:47.737Z] Checked if tokens are valid: true, expires at: 1777308955450
+[debug] [2026-04-27T16:12:47.737Z] Checked if tokens are valid: true, expires at: 1777308955450
+[debug] [2026-04-27T16:12:47.737Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/gen-lang-client-0164208100 [none]
+[debug] [2026-04-27T16:12:48.001Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/gen-lang-client-0164208100 200
+[debug] [2026-04-27T16:12:48.001Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/gen-lang-client-0164208100 {"projectId":"gen-lang-client-0164208100","projectNumber":"913412574312","displayName":"blucid","name":"projects/gen-lang-client-0164208100","resources":{"hostingSite":"gen-lang-client-0164208100","realtimeDatabaseInstance":"gen-lang-client-0164208100-default-rtdb"},"state":"ACTIVE","etag":"1_358d23d5-ce7e-41bf-8808-89ffe5d76571"}
+[info] 
+[info] Your public directory is the folder (relative to your project directory) that
+[info] will contain Hosting assets to be uploaded with firebase deploy. If you
+[info] have a build process for your assets, use your build's output directory.
+[info] 
+[info] 
+[info] i  Detected a .git folder at /home/user/blucid-inc 
+[info] i  Authorizing with GitHub to upload your service account to a GitHub repository's secrets store. 
+[info] 
+[info] Visit this URL on this device to log in:
+[info] https://github.com/login/oauth/authorize?client_id=89cf50f02ac6aaed3484&state=124563292&redirect_uri=http%3A%2F%2Flocalhost%3A9005&scope=read%3Auser%20repo%20public_repo
+[info] 
+[info] Waiting for authentication...

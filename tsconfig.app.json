@@ -4,12 +4,10 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": []
+    "types": [
+      "node"
+    ]
   },
-  "include": [
-    "src/**/*.ts"
-, "public/products/products-manager.service.ts", "admin/public-website.service.ts", "public/services/services-manager.service.ts", "admin/website-content.service.ts"  ],
-  "exclude": [
-    "src/**/*.spec.ts"
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.spec.ts"]
 }

@@ -151,7 +151,7 @@ export class ServiceDetail implements OnInit {
     'solar-installation': {
       title: 'Solar PV Systems',
       icon: 'solar_power',
-      image: 'https://aurorasolar.com/wp-content/uploads/2022/05/New-Cover-How-PV-System-Produces-Electricity.webp',
+      image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQyQctbPWABdXPJKsNvikAgQgGF8mU-tF2UDw&s',
       longDescription: 'Our comprehensive solar installation service is designed to provide you with a seamless transition to clean energy. We handle everything from initial site assessment to final grid connection, ensuring your system is optimized for the specific conditions of your property in Laguna.',
       benefits: [
         { title: 'Cost Savings', icon: 'payments', desc: 'Reduce your monthly electricity bills by up to 85%.' },
@@ -173,7 +173,7 @@ export class ServiceDetail implements OnInit {
     'electrical-works': {
       title: 'Electrical Contracting',
       icon: 'electrical_services',
-      image: 'https://5.imimg.com/data5/SELLER/Default/2022/1/CY/UR/FL/48161375/image-500x500.jpg',
+      image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7_lL0dV4xZPt7GKHfcPdbajtWNEDqsK-VJw&s',
       longDescription: 'Expert contracting and sub-contracting for all types of electrical installations and wiring. We guarantee safety, compliance, and optimized performance for all projects.',
       benefits: [
         { title: 'Safety First', icon: 'verified_user', desc: 'All wiring is exactly to code.' },
@@ -190,7 +190,7 @@ export class ServiceDetail implements OnInit {
     'telecom-projects': {
       title: 'Telecom Projects',
       icon: 'cell_tower',
-      image: 'https://alamopmllc.com/wp-content/uploads/2023/10/crt_0_-6-3-1.jpg',
+      image: 'https://images.unsplash.com/photo-1544928147-79a2dbc1f389?q=80&w=2000',
       longDescription: 'Comprehensive telecommunication installations including pole erection, fiber optic cable laying & fixing, cable splicing, and battery/rectifier installation.',
       benefits: [
         { title: 'High Bandwidth', icon: 'network_check', desc: 'State of the art fiber optic splicing.' },
@@ -224,7 +224,7 @@ export class ServiceDetail implements OnInit {
     'air-conditioning': {
       title: 'Air Conditioning Systems',
       icon: 'ac_unit',
-      image: 'https://www.coolingpost.com/wp-content/uploads/2020/08/55556080_s.jpg',
+      image: 'https://images.unsplash.com/photo-1595166258077-8fa0663db6c1?q=80&w=2000',
       longDescription: 'Complete supply, installation, and maintenance of advanced Air Conditioning systems, ensuring optimal climate control and efficiency.',
       benefits: [
         { title: 'Energy Efficiency', icon: 'eco', desc: 'Using advanced inverter compressor systems.' },

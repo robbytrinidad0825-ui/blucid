@@ -2,8 +2,7 @@ import {Component, HostListener, signal, inject, PLATFORM_ID} from '@angular/cor
 import {isPlatformBrowser} from '@angular/common';
 import {MatIconModule} from '@angular/material/icon';
 import {NgClass} from '@angular/common';
-import { animate } from 'motion';
-
+import {animate} from 'motion';
 
 @Component({
   selector: 'app-back-to-top',

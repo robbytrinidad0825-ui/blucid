@@ -1,8 +1,8 @@
 import {Component, signal, OnInit, inject, PLATFORM_ID} from '@angular/core';
 import {isPlatformBrowser} from '@angular/common';
-
+import {MatIconModule} from '@angular/material/icon';
 import {RouterLink} from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
+
 @Component({
   selector: 'app-services',
   imports: [MatIconModule, RouterLink],

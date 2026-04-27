@@ -3,8 +3,9 @@
   "version": 1,
   "cli": {
     "packageManager": "npm",
-    "schematicCollections": ["angular-eslint"],
-    "analytics": false
+    "schematicCollections": [
+      "angular-eslint"
+    ]
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -20,7 +21,7 @@
           "options": {
             "outputPath": "dist",
             "define": {
-              "GEMINI_API_KEY": "'AIzaSyDYp-J4yoRW_u8E2mENS9afG8liL9iYKf4'"
+              "GEMINI_API_KEY": "'YOUR_GEMINI_API_KEY'"
             },
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
@@ -30,8 +31,11 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/material-theme.scss", "src/styles.css"],
+            "styles": [
+              "src/styles.css"
+            ],
             "server": "src/main.server.ts",
+            "outputMode": "server",
             "ssr": {
               "entry": "src/server.ts"
             }
@@ -78,7 +82,10 @@
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
+            ]
           }
         }
       }

@@ -2,6 +2,7 @@ import {Component, signal, OnInit, inject, PLATFORM_ID} from '@angular/core';
 import {isPlatformBrowser} from '@angular/common';
 import {MatIconModule} from '@angular/material/icon';
 import {NgClass} from '@angular/common';
+import {SeoService} from './seo';
 
 @Component({
   selector: 'app-faq',
@@ -15,8 +16,8 @@ import {NgClass} from '@angular/common';
       <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-50 z-0"></div>
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-        <h1 class="text-4xl lg:text-6xl font-display font-black text-secondary mb-6">{{pageData().headerTitle}}</h1>
-        <p class="text-slate-600 max-w-2xl mx-auto">{{pageData().headerSubtitle}}</p>
+        <h1 class="text-4xl lg:text-6xl font-display font-black text-primary mb-6">{{pageData().headerTitle}}</h1>
+        <p class="text-slate-800 max-w-2xl mx-auto">{{pageData().headerSubtitle}}</p>
       </div>
     </section>
 
@@ -40,7 +41,7 @@ import {NgClass} from '@angular/common';
                 [style.max-height]="openIndex === i ? '500px' : '0'"
                 [style.padding-bottom]="openIndex === i ? '1.25rem' : '0'"
               >
-                <p class="text-slate-600 text-sm leading-relaxed">
+                <p class="text-slate-800 text-sm leading-relaxed">
                   {{item.a}}
                 </p>
               </div>
@@ -50,7 +51,7 @@ import {NgClass} from '@angular/common';
         
         <div class="mt-16 p-8 rounded-3xl bg-blue-50 border border-blue-100 text-center">
           <h3 class="text-xl font-bold text-secondary mb-2">{{ pageData().ctaTitle || 'Still have questions?' }}</h3>
-          <p class="text-slate-600 mb-6">{{ pageData().ctaDescription || "Can't find the answer you're looking for? Please chat to our friendly team." }}</p>
+          <p class="text-slate-800 mb-6">{{ pageData().ctaDescription || "Can't find the answer you're looking for? Please chat to our friendly team." }}</p>
           <a [href]="'tel:' + pageData().ctaPhone" class="inline-flex items-center justify-center px-6 py-3 rounded-full bg-primary text-white font-bold hover:bg-primary-dark transition-all">
             Call Us Now
           </a>
@@ -61,6 +62,7 @@ import {NgClass} from '@angular/common';
 })
 export class FAQ implements OnInit {
   private platformId = inject(PLATFORM_ID);
+  private seo = inject(SeoService);
 
   pageData = signal({
     headerTitle: 'Frequently Asked Questions',
@@ -77,6 +79,13 @@ export class FAQ implements OnInit {
   });
 
   ngOnInit() {
+    this.seo.updateTags({
+      title: 'Common Questions About Solar & Energy',
+      description: 'Get answers to frequently asked questions about solar panel installation, costs, warranties, and electrical services in the Philippines.',
+      image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=2070&auto=format&fit=crop',
+      url: 'https://blucidenterprise.com/faq'
+    });
+
     if (isPlatformBrowser(this.platformId)) {
       const websiteDraft = localStorage.getItem('blucid_website_draft');
       if (websiteDraft) {

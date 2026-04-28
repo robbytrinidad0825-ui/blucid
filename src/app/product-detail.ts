@@ -2,7 +2,7 @@ import {Component, inject, signal, OnInit, PLATFORM_ID} from '@angular/core';
 import {isPlatformBrowser} from '@angular/common';
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import {MatIconModule} from '@angular/material/icon';
-import {Title, Meta} from '@angular/platform-browser';
+import {SeoService} from './seo';
 
 interface ProductSpec {
   label: string;
@@ -75,7 +75,7 @@ interface ProductInfo {
                 <h1 class="text-4xl lg:text-5xl font-display font-black text-secondary mb-4">{{product.name}}</h1>
               </div>
 
-              <p class="text-slate-600 text-lg leading-relaxed mb-10">{{product.desc}}</p>
+              <p class="text-slate-800 text-lg leading-relaxed mb-10">{{product.desc}}</p>
 
               <div class="space-y-6 mb-10">
                 <h3 class="text-sm font-bold uppercase tracking-widest text-secondary border-b border-slate-100 pb-4">Technical Specifications</h3>
@@ -157,8 +157,7 @@ interface ProductInfo {
 })
 export class ProductDetail implements OnInit {
   private route = inject(ActivatedRoute);
-  private title = inject(Title);
-  private meta = inject(Meta);
+  private seo = inject(SeoService);
   
   private platformId = inject(PLATFORM_ID);
   
@@ -169,12 +168,12 @@ export class ProductDetail implements OnInit {
     this.route.params.subscribe(() => {
       const product = this.product;
       if (product) {
-        const pageTitle = `${product.name} | Blucid Enterprise Shop`;
-        this.title.setTitle(pageTitle);
-        this.meta.updateTag({ name: 'description', content: product.desc });
-        this.meta.updateTag({ property: 'og:title', content: pageTitle });
-        this.meta.updateTag({ property: 'og:description', content: product.desc });
-        this.meta.updateTag({ property: 'og:image', content: product.images[0] });
+        this.seo.updateTags({
+          title: product.name,
+          description: product.desc,
+          image: product.images[0],
+          url: `https://blucidenterprise.com/product/${product.id}`
+        });
       }
     });
   }

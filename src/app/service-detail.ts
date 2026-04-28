@@ -2,7 +2,7 @@ import {Component, inject, signal, OnInit, PLATFORM_ID} from '@angular/core';
 import {isPlatformBrowser, NgClass} from '@angular/common';
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import {MatIconModule} from '@angular/material/icon';
-import {Title, Meta} from '@angular/platform-browser';
+import {SeoService} from './seo';
 
 interface ServiceFAQ {
   q: string;
@@ -47,14 +47,14 @@ interface ServiceInfo {
                 <mat-icon class="text-3xl">{{service.icon}}</mat-icon>
               </div>
               <h1 class="text-4xl lg:text-6xl font-display font-black text-secondary mb-6">{{service.title}}</h1>
-              <p class="text-lg text-slate-600 leading-relaxed mb-8">{{service.longDescription}}</p>
+              <p class="text-lg text-slate-800 leading-relaxed mb-8">{{service.longDescription}}</p>
               
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
                 @for (benefit of service.benefits; track benefit.title) {
                   <div class="p-6 rounded-2xl bg-white border border-slate-100 shadow-sm">
                     <mat-icon class="text-primary mb-3">{{benefit.icon}}</mat-icon>
                     <h4 class="font-bold text-secondary mb-2">{{benefit.title}}</h4>
-                    <p class="text-slate-500 text-sm">{{benefit.desc}}</p>
+                    <p class="text-slate-800 text-sm">{{benefit.desc}}</p>
                   </div>
                 }
               </div>
@@ -85,7 +85,7 @@ interface ServiceInfo {
                     </div>
                     <div class="pb-12">
                       <h3 class="text-xl font-bold text-secondary mb-3 group-hover:text-primary transition-colors duration-300">{{step.title}}</h3>
-                      <p class="text-slate-600 leading-relaxed">{{step.desc}}</p>
+                      <p class="text-slate-800 leading-relaxed">{{step.desc}}</p>
                     </div>
                   </div>
                 }
@@ -112,7 +112,7 @@ interface ServiceInfo {
                       [style.max-height]="openFaqIndex() === i ? '300px' : '0'"
                       [style.padding-bottom]="openFaqIndex() === i ? '1rem' : '0'"
                     >
-                      <p class="text-slate-600 text-sm leading-relaxed">
+                      <p class="text-slate-800 text-sm leading-relaxed">
                         {{faq.a}}
                       </p>
                     </div>
@@ -127,7 +127,7 @@ interface ServiceInfo {
       <section class="py-20 bg-secondary text-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 class="text-3xl lg:text-5xl font-display font-black mb-8">Ready to get started?</h2>
-          <p class="text-slate-400 text-lg mb-10 max-w-2xl mx-auto">Contact our experts today for a detailed consultation and customized quote for {{service.title}}.</p>
+          <p class="text-slate-800 text-lg mb-10 max-w-2xl mx-auto">Contact our experts today for a detailed consultation and customized quote for {{service.title}}.</p>
           <a [routerLink]="['/contact']" [queryParams]="{interest: service.title}" class="inline-flex items-center justify-center px-10 py-5 rounded-full bg-primary text-white font-bold hover:bg-primary-dark transition-all">
             Request a Quote
             <mat-icon class="ml-2">arrow_forward</mat-icon>
@@ -144,8 +144,7 @@ interface ServiceInfo {
 })
 export class ServiceDetail implements OnInit {
   private route = inject(ActivatedRoute);
-  private title = inject(Title);
-  private meta = inject(Meta);
+  private seo = inject(SeoService);
   
   serviceData: Record<string, ServiceInfo> = {
     'solar-installation': {
@@ -293,12 +292,12 @@ export class ServiceDetail implements OnInit {
     this.route.params.subscribe(() => {
       const service = this.service;
       if (service) {
-        const pageTitle = `${service.title} | Blucid Enterprise`;
-        this.title.setTitle(pageTitle);
-        this.meta.updateTag({ name: 'description', content: service.longDescription });
-        this.meta.updateTag({ property: 'og:title', content: pageTitle });
-        this.meta.updateTag({ property: 'og:description', content: service.longDescription });
-        this.meta.updateTag({ property: 'og:image', content: service.image });
+        this.seo.updateTags({
+          title: service.title,
+          description: service.longDescription,
+          image: service.image,
+          url: `https://blucidenterprise.com/services/${this.route.snapshot.paramMap.get('id')}`
+        });
       }
     });
   }

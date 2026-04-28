@@ -17,7 +17,7 @@ import {MatIconModule} from '@angular/material/icon';
             <mat-icon class="text-3xl">admin_panel_settings</mat-icon>
           </div>
           <h1 class="text-3xl font-display font-black text-secondary">Admin Portal</h1>
-          <p class="text-slate-500 mt-2">Blucid Enterprise Inc. Management</p>
+          <p class="text-slate-800 mt-2">Blucid Enterprise Inc. Management</p>
         </div>
 
         <!-- Login Card -->

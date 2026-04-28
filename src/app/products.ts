@@ -3,6 +3,7 @@ import {isPlatformBrowser} from '@angular/common';
 import {MatIconModule} from '@angular/material/icon';
 import {FormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
+import {SeoService} from './seo';
 
 @Component({
   selector: 'app-products',
@@ -16,8 +17,8 @@ import {RouterLink} from '@angular/router';
       <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-50 z-0"></div>
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-        <h1 class="text-4xl lg:text-6xl font-display font-black text-secondary mb-6">{{pageData().headerTitle}}</h1>
-        <p class="text-slate-600 max-w-2xl mx-auto">{{pageData().headerSubtitle}}</p>
+        <h1 class="text-4xl lg:text-6xl font-display font-black text-primary mb-6">{{pageData().headerTitle}}</h1>
+        <p class="text-slate-800 max-w-2xl mx-auto">{{pageData().headerSubtitle}}</p>
       </div>
     </section>
 
@@ -158,7 +159,7 @@ import {RouterLink} from '@angular/router';
                 <a [routerLink]="['/products', product.id]">
                   <h3 class="text-xl font-bold text-secondary mb-2 group-hover:text-primary transition-colors">{{product.name}}</h3>
                 </a>
-                <p class="text-slate-500 text-sm mb-6 leading-relaxed">{{product.desc}}</p>
+                <p class="text-slate-800 text-sm mb-6 leading-relaxed">{{product.desc}}</p>
                 <div class="flex flex-col gap-4">
                   <div class="flex items-center justify-between">
                     
@@ -188,7 +189,7 @@ import {RouterLink} from '@angular/router';
             <div class="col-span-full py-20 text-center">
               <mat-icon class="text-6xl text-slate-200 mb-4">search_off</mat-icon>
               <h3 class="text-xl font-bold text-secondary">No products found</h3>
-              <p class="text-slate-500">Try adjusting your filters or category selection.</p>
+              <p class="text-slate-800">Try adjusting your filters or category selection.</p>
             </div>
           }
         </div>
@@ -198,6 +199,7 @@ import {RouterLink} from '@angular/router';
 })
 export class Products implements OnInit {
   private platformId = inject(PLATFORM_ID);
+  private seo = inject(SeoService);
 
   pageData = signal({
     headerTitle: 'Our Products',
@@ -367,6 +369,13 @@ export class Products implements OnInit {
   }
 
   ngOnInit() {
+    this.seo.updateTags({
+      title: 'Solar Panel Shop & Electrical Components',
+      description: 'Browse our selection of high-efficiency solar panels, industrial power systems, smart distribution panels, and more. Quality electrical and solar products in Laguna.',
+      image: 'https://images.unsplash.com/photo-1509391366360-fe5bb65830bb?q=80&w=2070&auto=format&fit=crop',
+      url: 'https://blucidenterprise.com/products'
+    });
+
     if (isPlatformBrowser(this.platformId)) {
       const websiteDraft = localStorage.getItem('blucid_website_draft');
       if (websiteDraft) {

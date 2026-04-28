@@ -2,6 +2,7 @@ import {Component, signal, OnInit, inject, PLATFORM_ID} from '@angular/core';
 import {isPlatformBrowser} from '@angular/common';
 import {MatIconModule} from '@angular/material/icon';
 import {RouterLink} from '@angular/router';
+import {SeoService} from './seo';
 
 @Component({
   selector: 'app-services',
@@ -15,8 +16,8 @@ import {RouterLink} from '@angular/router';
       <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-50 z-0"></div>
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-        <h1 class="text-4xl lg:text-6xl font-display font-black text-secondary mb-6">{{pageData().headerTitle}}</h1>
-        <p class="text-slate-600 max-w-2xl mx-auto">{{pageData().headerSubtitle}}</p>
+        <h1 class="text-4xl lg:text-6xl font-display font-black text-primary mb-6">{{pageData().headerTitle}}</h1>
+        <p class="text-slate-800 max-w-2xl mx-auto">{{pageData().headerSubtitle}}</p>
       </div>
     </section>
 
@@ -32,7 +33,7 @@ import {RouterLink} from '@angular/router';
                 <mat-icon class="text-3xl">{{service.icon}}</mat-icon>
               </div>
               <h3 class="relative z-10 text-2xl font-bold text-secondary mb-4 group-hover:text-primary transition-colors duration-300">{{service.title}}</h3>
-              <p class="relative z-10 text-slate-600 leading-relaxed mb-6 flex-grow">{{service.description}}</p>
+              <p class="relative z-10 text-slate-800 leading-relaxed mb-6 flex-grow">{{service.description}}</p>
               <ul class="relative z-10 space-y-3 mb-8">
                 @for (item of service.features; track item) {
                   <li class="flex items-center gap-3 text-sm text-slate-500">
@@ -51,37 +52,37 @@ import {RouterLink} from '@angular/router';
       </div>
     </section>
 
-    <section class="py-24 bg-secondary text-white overflow-hidden relative">
+    <section class="py-24 bg-white text-secondary overflow-hidden relative border-t border-slate-100">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="lg:grid lg:grid-cols-2 lg:gap-20 items-center">
           <div>
-            <h2 class="text-3xl lg:text-5xl font-display font-black mb-8">{{ pageData().secondaryTitle || 'Custom Wiring & Installation' }}</h2>
-            <p class="text-slate-400 text-lg mb-10 leading-relaxed">
+            <h2 class="text-3xl lg:text-5xl font-display font-black mb-8 text-primary">{{ pageData().secondaryTitle || 'Custom Wiring & Installation' }}</h2>
+            <p class="text-slate-800 text-lg mb-10 leading-relaxed">
               {{ pageData().secondaryDescription || "Beyond solar panels, we specialize in complete wiring installation setups. Whether it's a new building or a retrofit, our team ensures your electrical infrastructure is robust, safe, and ready for high-efficiency energy." }}
             </p>
             <div class="space-y-6">
               <div class="flex gap-6">
-                <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                   <mat-icon>settings_input_component</mat-icon>
                 </div>
                 <div>
-                  <h4 class="text-xl font-bold mb-2">Volt Switch Panels</h4>
-                  <p class="text-slate-400 text-sm">Advanced control panels for precise energy management and distribution.</p>
+                  <h4 class="text-xl font-bold mb-2 text-secondary">Volt Switch Panels</h4>
+                  <p class="text-slate-800 text-sm">Advanced control panels for precise energy management and distribution.</p>
                 </div>
               </div>
               <div class="flex gap-6">
-                <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                   <mat-icon>battery_charging_full</mat-icon>
                 </div>
                 <div>
-                  <h4 class="text-xl font-bold mb-2">Battery Storage Solutions</h4>
-                  <p class="text-slate-400 text-sm">High-capacity battery banks to store your solar energy for night use or backup.</p>
+                  <h4 class="text-xl font-bold mb-2 text-secondary">Battery Storage Solutions</h4>
+                  <p class="text-slate-800 text-sm">High-capacity battery banks to store your solar energy for night use or backup.</p>
                 </div>
               </div>
             </div>
           </div>
           <div class="mt-16 lg:mt-0 relative">
-            <div class="absolute -inset-4 bg-primary/20 blur-3xl rounded-full"></div>
+            <div class="absolute -inset-4 bg-primary/5 blur-3xl rounded-full"></div>
             <img src="https://cdn.shopify.com/s/files/1/0011/4102/files/photovoltaics-systems-failures_1_large.jpg?v=1532130633" alt="Electrical Wiring Setup" class="relative rounded-3xl shadow-2xl" referrerpolicy="no-referrer">
           </div>
         </div>
@@ -91,6 +92,7 @@ import {RouterLink} from '@angular/router';
 })
 export class Services implements OnInit {
   private platformId = inject(PLATFORM_ID);
+  private seo = inject(SeoService);
 
   pageData = signal({
     headerTitle: 'Our Services',
@@ -146,6 +148,13 @@ export class Services implements OnInit {
   ]);
 
   ngOnInit() {
+    this.seo.updateTags({
+      title: 'Our Solar & Electrical Services',
+      description: 'Explore our wide range of services including professional solar installation, component supply, technical support, and complete electrical wiring solutions.',
+      image: 'https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?q=80&w=2070&auto=format&fit=crop',
+      url: 'https://blucidenterprise.com/services'
+    });
+
     if (isPlatformBrowser(this.platformId)) {
       const websiteDraft = localStorage.getItem('blucid_website_draft');
       if (websiteDraft) {

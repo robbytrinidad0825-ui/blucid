@@ -3,6 +3,10 @@ import {isPlatformBrowser} from '@angular/common';
 import {MatIconModule} from '@angular/material/icon';
 import {ReactiveFormsModule, FormGroup, FormControl, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
+import {SeoService} from './seo';
+
+interface ServiceItem { id: string; title: string; }
+interface ProductItem { id: string; name: string; }
 
 @Component({
   selector: 'app-contact',
@@ -17,7 +21,7 @@ import {ActivatedRoute} from '@angular/router';
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
         <h1 class="text-4xl lg:text-6xl font-display font-black text-secondary mb-6">{{pageData().headerTitle}}</h1>
-        <p class="text-slate-600 max-w-2xl mx-auto">{{pageData().headerSubtitle}}</p>
+        <p class="text-slate-800 max-w-2xl mx-auto">{{pageData().headerSubtitle}}</p>
       </div>
     </section>
 
@@ -31,7 +35,7 @@ import {ActivatedRoute} from '@angular/router';
             <h2 class="text-3xl lg:text-4xl font-display font-black text-secondary mb-3 tracking-tight">
               {{ pageData().formTitle || 'Project Details' }}
             </h2>
-            <p class="text-slate-500 mb-10 text-lg leading-relaxed">Fill out the form below and our specialists will provide a custom energy solution tailored to your site.</p>
+            <p class="text-slate-800 mb-10 text-lg leading-relaxed">Fill out the form below and our specialists will provide a custom energy solution tailored to your site.</p>
             
             @if (submitted) {
               <div class="p-10 rounded-[2.5rem] bg-emerald-50 border border-emerald-100/50 text-center animate-in fade-in zoom-in-95 duration-700 shadow-2xl shadow-emerald-500/10">
@@ -39,7 +43,7 @@ import {ActivatedRoute} from '@angular/router';
                   <mat-icon class="!w-12 !h-12 !text-[48px]">verified</mat-icon>
                 </div>
                 <h3 class="text-3xl font-display font-black text-secondary mb-4 leading-tight tracking-tight">Request Received!</h3>
-                <p class="text-slate-600 mb-10 text-lg leading-relaxed">
+                <p class="text-slate-800 mb-10 text-lg leading-relaxed">
                   Thank you for choosing <span class="text-primary font-bold">Blucid</span>. Your project details have been safely transmitted to our engineering team. We'll reach out within <span class="font-bold text-secondary">24 hours</span>.
                 </p>
                 <button (click)="submitted = false" class="w-full py-5 rounded-2xl bg-secondary text-white font-black text-sm uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-200">
@@ -127,26 +131,21 @@ import {ActivatedRoute} from '@angular/router';
                     </div>
                   </div>
 
-                  <!-- Interest Dropdown -->
                   <div class="space-y-1.5">
                     <label for="interest" class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
                       <mat-icon class="!w-3 !h-3 !text-[12px]">bolt</mat-icon> Project Category
                     </label>
                     <select id="interest" formControlName="interest" 
                       class="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold text-secondary focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all appearance-none cursor-pointer shadow-sm">
-                      <optgroup label="Core Services">
-                        <option value="Solar System Installation">Solar System Installation</option>
-                        <option value="Wiring & Electrical Setup">Wiring & Electrical Setup</option>
-                        <option value="Battery Supply & Setup">Battery Supply & Setup</option>
-                        <option value="Volt Switch Panels">Volt Switch Panels</option>
-                        <option value="Maintenance & Repair">Maintenance & Repair</option>
+                      <optgroup label="Our Services">
+                        @for (service of services(); track service.id) {
+                          <option [value]="service.title">{{service.title}}</option>
+                        }
                       </optgroup>
-                      <optgroup label="Premium Hardware">
-                        <option value="Blucid Mono-Crystalline 550W">Mono-Crystalline Panels</option>
-                        <option value="Blucid Poly-Crystalline 400W">Poly-Crystalline Panels</option>
-                        <option value="Lithium Iron Phosphate 10kWh">Lithium Batteries</option>
-                        <option value="Hybrid Solar Inverter 5kW">Inverters</option>
-                        <option value="Solar Mounting Rail System">Mounting Systems</option>
+                      <optgroup label="Primary Products">
+                        @for (product of products(); track product.id) {
+                          <option [value]="product.name">{{product.name}}</option>
+                        }
                       </optgroup>
                       <option value="Other">Other Strategic Inquiry</option>
                     </select>
@@ -174,7 +173,7 @@ import {ActivatedRoute} from '@angular/router';
                       Submit Quote Parameters <mat-icon>arrow_forward</mat-icon>
                     </span>
                   </button>
-                  <p class="text-center text-[10px] text-slate-400 uppercase tracking-widest font-black">Secure transmission enabled</p>
+                  <p class="text-center text-[10px] text-slate-800 uppercase tracking-widest font-black">Secure transmission enabled</p>
                 </form>
               </div>
             }
@@ -185,7 +184,7 @@ import {ActivatedRoute} from '@angular/router';
             <h2 class="text-3xl lg:text-4xl font-display font-black text-secondary mb-3 tracking-tight">
               {{ pageData().officeTitle || 'Our Office' }}
             </h2>
-            <p class="text-slate-500 mb-12 text-lg leading-relaxed">Visit our technical center or connect via high-priority communication channels.</p>
+            <p class="text-slate-800 mb-12 text-lg leading-relaxed">Visit our technical center or connect via high-priority communication channels.</p>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6 mb-12">
               <div class="group flex gap-6 p-6 rounded-3xl bg-slate-50/50 border border-slate-100 transition-all hover:bg-white hover:shadow-xl hover:shadow-slate-200/40">
@@ -249,6 +248,7 @@ import {ActivatedRoute} from '@angular/router';
 })
 export class Contact implements OnInit {
   private platformId = inject(PLATFORM_ID);
+  private seo = inject(SeoService);
 
   pageData = signal({
     headerTitle: 'Get In Touch',
@@ -269,11 +269,21 @@ export class Contact implements OnInit {
     email: new FormControl('', [Validators.required, Validators.email]),
     phone: new FormControl('', [Validators.required]),
     location: new FormControl('', [Validators.required]),
-    interest: new FormControl('Solar System Installation', [Validators.required]),
+    interest: new FormControl('', [Validators.required]),
     message: new FormControl('', [Validators.required])
   });
 
+  services = signal<ServiceItem[]>([]);
+  products = signal<ProductItem[]>([]);
+
   ngOnInit() {
+    this.seo.updateTags({
+      title: 'Contact Us & Free Quote',
+      description: 'Get a free quote for your solar and electrical projects in Laguna. Contact Blucid Enterprise Inc. for professional energy solutions and technical support.',
+      image: 'https://images.unsplash.com/photo-1534536281715-e28d76689b4d?q=80&w=2070&auto=format&fit=crop',
+      url: 'https://blucidenterprise.com/contact'
+    });
+
     if (isPlatformBrowser(this.platformId)) {
       const websiteDraft = localStorage.getItem('blucid_website_draft');
       if (websiteDraft) {
@@ -294,11 +304,53 @@ export class Contact implements OnInit {
           } catch { /* ignore */ }
         }
       }
+
+      // Load Services
+      const servicesStr = localStorage.getItem('blucid_services');
+      if (servicesStr) {
+        try {
+          const s = JSON.parse(servicesStr);
+          if (Array.isArray(s)) this.services.set(s);
+        } catch { /* ignore */ }
+      } else {
+        // Fallback to default services if not set
+        this.services.set([
+          { id: 'electrical-works', title: 'Electrical Contracting' },
+          { id: 'telecom-projects', title: 'Telecom Projects' },
+          { id: 'solar-installation', title: 'Solar PV Systems' },
+          { id: 'ups-systems', title: 'UPS Systems' },
+          { id: 'air-conditioning', title: 'Air Conditioning Systems' },
+          { id: 'construction-renovation', title: 'Construction & Renovation' }
+        ]);
+      }
+
+      // Load Products
+      const productsStr = localStorage.getItem('blucid_products');
+      if (productsStr) {
+        try {
+          const p = JSON.parse(productsStr);
+          if (Array.isArray(p)) this.products.set(p);
+        } catch { /* ignore */ }
+      } else {
+        // Fallback to default products
+        this.products.set([
+          { id: 'blucid-mono-550w', name: 'Blucid 550W Mono-Crystalline Panel' },
+          { id: 'industrial-ups-10kva', name: 'Industrial Double Conversion UPS (10kVA)' },
+          { id: 'solar-water-purifier-sv120', name: 'Solar Water Purification SV-120' },
+          { id: 'telecom-rectifier-system', name: 'Telecom DC Power Rectifier System' },
+          { id: 'precision-industrial-aircon', name: 'Precision Industrial HVAC Unit' },
+          { id: 'smart-distribution-panel-iot', name: 'Smart IoT Electrical Distribution Panel' }
+        ]);
+      }
     }
 
     this.route.queryParams.subscribe(params => {
       if (params['interest']) {
         this.contactForm.patchValue({ interest: params['interest'] });
+      } else if (this.services().length > 0) {
+        this.contactForm.patchValue({ interest: (this.services()[0] as ServiceItem).title });
+      } else {
+        this.contactForm.patchValue({ interest: 'Other' });
       }
     });
   }
@@ -326,7 +378,13 @@ export class Contact implements OnInit {
         }
       }
       this.submitted = true;
-      this.contactForm.reset({ interest: 'Solar System Installation' });
+      this.contactForm.reset();
+      // Set default interest if services exist
+      if (this.services().length > 0) {
+        this.contactForm.patchValue({ interest: (this.services()[0] as ServiceItem).title });
+      } else {
+        this.contactForm.patchValue({ interest: 'Other' });
+      }
     }
   }
 }

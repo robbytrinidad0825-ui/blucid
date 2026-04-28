@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, inject, AfterViewInit, OnInit, ElementRef, ViewChildren, QueryList, PLATFORM_ID, signal, computed} from '@angular/core';
-import {isPlatformBrowser, NgClass, SlicePipe, DatePipe, TitleCasePipe} from '@angular/common';
+import {isPlatformBrowser, NgClass, SlicePipe, DatePipe, TitleCasePipe, DecimalPipe} from '@angular/common';
 import {Router} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {MatIconModule} from '@angular/material/icon';
@@ -50,61 +50,45 @@ interface ServiceJob {
 @Component({
   selector: 'app-admin-dashboard',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatIconModule, MatRippleModule, MatMenuModule, MatButtonModule, MatBadgeModule, NgClass, SlicePipe, DatePipe, TitleCasePipe, FormsModule, CdkDropList, CdkDrag, CdkDragHandle],
+  imports: [MatIconModule, MatRippleModule, MatMenuModule, MatButtonModule, MatBadgeModule, NgClass, SlicePipe, DatePipe, TitleCasePipe, DecimalPipe, FormsModule, CdkDropList, CdkDrag, CdkDragHandle],
   template: `
     <div class="min-h-screen bg-[#F8FAFC] lg:flex font-sans text-slate-900 pb-20 lg:pb-0">
       <!-- Sidebar -->
-      <aside class="hidden lg:flex flex-col w-72 bg-secondary text-white border-r border-slate-800 relative z-20 shadow-2xl">
+      <aside class="hidden lg:flex flex-col w-72 bg-secondary text-white border-r border-slate-800 relative z-20 shadow-2xl overflow-hidden">
         <div class="p-8">
-          <div class="flex items-center gap-3 mb-10 cursor-pointer" matRipple>
-            <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
+          <div class="flex items-center gap-3 mb-10 cursor-pointer group" (click)="activeSection.set('dashboard')" (keydown.enter)="activeSection.set('dashboard')" tabindex="0" role="button" matRipple>
+            <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30 group-hover:scale-110 transition-transform">
               <mat-icon>bolt</mat-icon>
             </div>
-            <span class="text-xl font-display font-black tracking-tight">Blucid <span class="text-primary italic">Admin</span></span>
+            <span class="text-xl font-display font-black tracking-tight">Blucid <span class="text-primary">Admin</span></span>
           </div>
 
-          <nav class="space-y-2">
-            <a role="button" tabindex="0" (keydown.enter)="activeSection.set('dashboard')" matRipple (click)="activeSection.set('dashboard')" [ngClass]="activeSection() === 'dashboard' ? 'bg-primary text-white font-bold shadow-md shadow-primary/20' : 'text-slate-400 hover:text-white hover:bg-white/5'" class="flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all cursor-pointer">
-              <mat-icon [class.text-white]="activeSection() === 'dashboard'">dashboard</mat-icon>
-              Dashboard
+          <nav class="space-y-0.5">
+            <a role="button" tabindex="0" (keydown.enter)="activeSection.set('dashboard')" matRipple (click)="activeSection.set('dashboard')" [ngClass]="activeSection() === 'dashboard' ? 'bg-primary text-white font-bold shadow-md shadow-primary/20' : 'text-slate-400 hover:text-white hover:bg-white/5'" class="flex items-center justify-between gap-4 px-4 py-3 rounded-xl transition-all cursor-pointer group">
+              <div class="flex items-center gap-4">
+                <mat-icon class="transition-colors" [class.text-white]="activeSection() === 'dashboard'">dashboard</mat-icon>
+                <span class="text-[50%]">Dashboard</span>
+              </div>
             </a>
-            <a role="button" tabindex="0" (keydown.enter)="activeSection.set('services')" matRipple (click)="activeSection.set('services')" [ngClass]="activeSection() === 'services' ? 'bg-primary text-white font-bold shadow-md shadow-primary/20' : 'text-slate-400 hover:text-white hover:bg-white/5'" class="flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all cursor-pointer">
+
+            <a role="button" tabindex="0" (keydown.enter)="activeSection.set('services')" matRipple (click)="activeSection.set('services')" [ngClass]="activeSection() === 'services' ? 'bg-primary text-white font-bold shadow-md shadow-primary/20' : 'text-slate-400 hover:text-white hover:bg-white/5'" class="flex items-center gap-4 px-4 py-3 rounded-xl transition-all cursor-pointer">
               <mat-icon [class.text-white]="activeSection() === 'services'">handyman</mat-icon>
-              Manage Services
+              <span class="text-[50%]">Manage Services</span>
             </a>
-            <a role="button" tabindex="0" (keydown.enter)="activeSection.set('products')" matRipple (click)="activeSection.set('products')" [ngClass]="activeSection() === 'products' ? 'bg-primary text-white font-bold shadow-md shadow-primary/20' : 'text-slate-400 hover:text-white hover:bg-white/5'" class="flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all cursor-pointer">
+
+            <a role="button" tabindex="0" (keydown.enter)="activeSection.set('products')" matRipple (click)="activeSection.set('products')" [ngClass]="activeSection() === 'products' ? 'bg-primary text-white font-bold shadow-md shadow-primary/20' : 'text-slate-400 hover:text-white hover:bg-white/5'" class="flex items-center gap-4 px-4 py-3 rounded-xl transition-all cursor-pointer">
               <mat-icon [class.text-white]="activeSection() === 'products'">inventory_2</mat-icon>
-              Manage Products
+              <span class="text-[50%]">Manage Products</span>
             </a>
-            <a role="button" tabindex="0" (keydown.enter)="activeSection.set('jobs')" matRipple (click)="activeSection.set('jobs')" [ngClass]="activeSection() === 'jobs' ? 'bg-primary text-white font-bold shadow-md shadow-primary/20' : 'text-slate-400 hover:text-white hover:bg-white/5'" class="flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all cursor-pointer">
+
+            <a role="button" tabindex="0" (keydown.enter)="activeSection.set('jobs')" matRipple (click)="activeSection.set('jobs')" [ngClass]="activeSection() === 'jobs' ? 'bg-primary text-white font-bold shadow-md shadow-primary/20' : 'text-slate-400 hover:text-white hover:bg-white/5'" class="flex items-center gap-4 px-4 py-3 rounded-xl transition-all cursor-pointer">
               <mat-icon [class.text-white]="activeSection() === 'jobs'">assignment_turned_in</mat-icon>
-              Service Job Orders
-            </a>
-            <a role="button" tabindex="0" (keydown.enter)="activeSection.set('website')" matRipple (click)="activeSection.set('website')" [ngClass]="activeSection() === 'website' ? 'bg-primary text-white font-bold shadow-md shadow-primary/20' : 'text-slate-400 hover:text-white hover:bg-white/5'" class="flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all cursor-pointer">
-              <mat-icon [class.text-white]="activeSection() === 'website'">public</mat-icon>
-              Edit Website
-            </a>
-            <a role="button" tabindex="0" (keydown.enter)="activeSection.set('inquiries')" matRipple (click)="activeSection.set('inquiries')" [ngClass]="activeSection() === 'inquiries' ? 'bg-primary text-white font-bold shadow-md shadow-primary/20' : 'text-slate-400 hover:text-white hover:bg-white/5'" class="flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all cursor-pointer">
-              <mat-icon [class.text-white]="activeSection() === 'inquiries'">mail</mat-icon>
-              Website Customer Inquiries
+              <span class="text-[50%]">Service Orders</span>
             </a>
           </nav>
         </div>
 
-        <div class="mt-auto p-4 border-t border-white/10">
-          <div role="button" tabindex="0" (keydown.enter)="activeSection.set('profile')" (click)="activeSection.set('profile')" matRipple class="bg-white/5 hover:bg-white/10 transition-colors rounded-2xl p-4 flex items-center gap-4 mb-4 cursor-pointer" [ngClass]="activeSection() === 'profile' ? 'ring-2 ring-primary bg-white/10' : ''">
-            <div class="w-10 h-10 rounded-full bg-slate-600 flex items-center justify-center text-white font-bold border-2 border-slate-500 overflow-hidden shrink-0">
-              {{ adminProfile().avatar }}
-            </div>
-            <div class="flex-grow">
-              <p class="text-sm font-bold truncate max-w-[140px]">{{ adminProfile().name }}</p>
-              <p class="text-xs text-slate-400 truncate max-w-[140px]">{{ adminProfile().email }}</p>
-            </div>
-          </div>
-          <button matRipple (click)="logout()" class="flex items-center gap-4 px-4 py-3.5 rounded-xl text-red-400 hover:bg-red-400/10 hover:text-red-300 transition-all w-full font-medium">
-            <mat-icon>logout</mat-icon>
-            Logout Securely
-          </button>
+        <div class="mt-auto p-6 bg-black/10">
         </div>
       </aside>
 
@@ -114,31 +98,33 @@ interface ServiceJob {
         <!-- Image Viewer Modal -->
         @if (selectedViewImage()) {
           <div role="button" tabindex="0" (keydown.enter)="selectedViewImage.set(null)" (keydown.escape)="selectedViewImage.set(null)" class="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-8 bg-black/95 backdrop-blur-sm transition-all duration-300 animate-in fade-in duration-300" (click)="selectedViewImage.set(null)">
-            <button (click)="selectedViewImage.set(null)" class="absolute top-6 right-6 z-50 w-12 h-12 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center backdrop-blur transition-colors" aria-label="Close image">
-              <mat-icon>close</mat-icon>
-            </button>
             <img [src]="selectedViewImage()" alt="Enlarged gallery photo" class="max-w-full max-h-full object-contain shadow-2xl rounded-lg animate-in zoom-in-95 duration-300" referrerpolicy="no-referrer" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" tabindex="0" role="button">
           </div>
         }
 
         <!-- Top Header -->
-        <header class="flex items-center justify-between lg:justify-end px-4 sm:px-8 py-3 sm:py-4 bg-white/80 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-10 w-full">
-          <!-- Mobile Brand -->
-          <div class="lg:hidden flex items-center gap-3">
-            <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
-              <mat-icon class="!w-5 !h-5 !text-[20px] text-white">bolt</mat-icon>
+        <header class="flex items-center justify-between px-4 sm:px-8 py-3 bg-white/80 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-40 w-full shadow-sm">
+          <!-- Mobile Brand & Breadcrumb -->
+          <div class="flex items-center gap-4">
+            <div class="hidden lg:flex items-center gap-2">
+              <span class="text-slate-400 text-sm font-medium">Admin /</span>
+              <span class="text-secondary text-sm font-black">{{ activeSectionLabel() }}</span>
             </div>
-            <span class="text-lg font-display font-black tracking-tight">Blucid</span>
+            <div class="lg:hidden flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
+                <mat-icon class="!w-5 !h-5 !text-[20px] text-white">bolt</mat-icon>
+              </div>
+              <span class="text-lg font-display font-black tracking-tight">{{ activeSectionLabel() }}</span>
+            </div>
           </div>
 
+          <!-- Desktop Actions -->
           <div class="flex items-center gap-2 sm:gap-4">
-            <button mat-icon-button (click)="isRightSidebarOpen.set(!isRightSidebarOpen())" class="text-slate-500 hover:text-primary transition-all duration-300 transform hover:scale-110 active:scale-95 bg-slate-50 hover:bg-slate-100 relative">
-              <mat-icon class="transition-transform duration-500" [class.rotate-90]="isRightSidebarOpen()">
-                {{ isRightSidebarOpen() ? 'close' : 'menu' }}
-              </mat-icon>
-              @if (notifications().length > 0 && !isRightSidebarOpen()) {
-                <span class="absolute top-0 right-0 w-3 h-3 bg-rose-500 border-2 border-white rounded-full animate-pulse"></span>
-              }
+            <button mat-icon-button (click)="showNotificationsModal.set(true)" class="text-slate-400 hover:text-primary transition-colors relative">
+              <mat-icon [matBadge]="notifications().length" matBadgeColor="warn" matBadgeSize="small" [matBadgeHidden]="notifications().length === 0">notifications</mat-icon>
+            </button>
+            <button mat-icon-button (click)="isRightSidebarOpen.set(!isRightSidebarOpen())" class="text-slate-500 hover:bg-slate-100 ml-1">
+              <mat-icon>{{ isRightSidebarOpen() ? 'close' : 'menu' }}</mat-icon>
             </button>
           </div>
         </header>
@@ -149,41 +135,34 @@ interface ServiceJob {
           <div role="button" tabindex="0" (keydown.enter)="isRightSidebarOpen.set(false)" class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 transition-opacity duration-500 animate-in fade-in" (click)="isRightSidebarOpen.set(false)"></div>
         }
         
-        <!-- Drawer -->
+        <!-- Right Sidebar (Drawer) -->
         <div 
-          class="fixed inset-y-0 right-0 z-50 bg-white shadow-[-10px_0_30px_rgba(0,0,0,0.1)] border-l border-slate-100 transform transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] flex flex-col items-center w-[16%] min-w-[60px]"
+          class="fixed inset-y-0 right-0 z-50 bg-secondary text-white shadow-2xl transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] flex flex-col w-20 sm:w-24"
           [class.translate-x-0]="isRightSidebarOpen()"
-          [class.translate-x-full]="!isRightSidebarOpen()"
+          [class.translate-x-[100%]]="!isRightSidebarOpen()"
         >
-          <div class="flex items-center justify-center w-full p-4 h-[73px] border-b border-slate-100">
-            <button mat-icon-button (click)="isRightSidebarOpen.set(false)" class="text-slate-400 hover:text-secondary group transition-colors">
-              <mat-icon class="transition-transform duration-300 group-hover:rotate-90">close</mat-icon>
-            </button>
-          </div>
           
-          <div class="py-4 flex flex-col items-center justify-start gap-[2px] w-full">
-            <!-- Notifications Info -->
-            <button mat-icon-button (click)="showNotificationsModal.set(true)" class="text-orange-500 hover:bg-orange-50 transition-colors" title="Alerts">
-              <mat-icon [matBadge]="notifications().length" matBadgeColor="warn" matBadgeSize="small">notifications_active</mat-icon>
-            </button>
+          <div class="pt-8 pb-4 px-4 flex-grow overflow-y-auto scroll-smooth space-y-4 custom-scrollbar flex flex-col items-center">
+            <a role="button" title="My Profile" tabindex="0" (keydown.enter)="activeSection.set('profile'); isRightSidebarOpen.set(false)" (click)="activeSection.set('profile'); isRightSidebarOpen.set(false)" class="flex items-center justify-center w-14 h-14 rounded-2xl transition-all cursor-pointer group" [ngClass]="activeSection() === 'profile' ? 'bg-primary text-white shadow-md' : 'text-slate-400 hover:bg-white/5'">
+              <mat-icon [class.scale-110]="activeSection() === 'profile'" class="transition-transform group-hover:scale-110 !text-2xl">person_outline</mat-icon>
+            </a>
+            <a role="button" title="Customer Inquiries" tabindex="0" (keydown.enter)="activeSection.set('inquiries'); isRightSidebarOpen.set(false)" (click)="activeSection.set('inquiries'); isRightSidebarOpen.set(false)" class="flex items-center justify-center w-14 h-14 rounded-2xl transition-all cursor-pointer group" [ngClass]="activeSection() === 'inquiries' ? 'bg-primary text-white shadow-md' : 'text-slate-400 hover:bg-white/5'">
+              <div class="relative">
+                <mat-icon [class.scale-110]="activeSection() === 'inquiries'" class="transition-transform group-hover:scale-110 !text-2xl">mail</mat-icon>
+                @if (newInquiriesCount() > 0) {
+                  <div class="absolute -top-1.5 -right-1.5 w-3 h-3 bg-rose-500 rounded-full border-2 border-secondary"></div>
+                }
+              </div>
+            </a>
+            <a role="button" title="Edit Website" tabindex="0" (keydown.enter)="activeSection.set('website'); isRightSidebarOpen.set(false)" (click)="activeSection.set('website'); isRightSidebarOpen.set(false)" class="flex items-center justify-center w-14 h-14 rounded-2xl transition-all cursor-pointer group" [ngClass]="activeSection() === 'website' ? 'bg-primary text-white shadow-md' : 'text-slate-400 hover:bg-white/5'">
+              <mat-icon [class.scale-110]="activeSection() === 'website'" class="transition-transform group-hover:scale-110 !text-2xl">public</mat-icon>
+            </a>
 
-            <!-- User Menu -->
-            <button mat-icon-button (click)="activeSection.set('profile'); isRightSidebarOpen.set(false)" class="text-slate-400 hover:text-primary transition-colors hover:bg-slate-50" title="My Profile" [ngClass]="{'text-primary bg-slate-50': activeSection() === 'profile'}">
-              <mat-icon>person_outline</mat-icon>
-            </button>
-
-            <button mat-icon-button (click)="activeSection.set('settings'); isRightSidebarOpen.set(false)" class="text-slate-400 hover:text-primary transition-colors hover:bg-slate-50" title="Account Settings" [ngClass]="{'text-primary bg-slate-50': activeSection() === 'settings'}">
-              <mat-icon>settings</mat-icon>
-            </button>
-            
-            <button mat-icon-button (click)="activeSection.set('inquiries'); isRightSidebarOpen.set(false)" class="text-slate-400 hover:text-primary transition-colors hover:bg-slate-50" title="Customer Inquiries" [ngClass]="{'text-primary bg-slate-50': activeSection() === 'inquiries'}">
-              <mat-icon>mail</mat-icon> 
-            </button>
-
-            <div class="h-px w-8 bg-slate-100 my-[2px]"></div>
-            
-            <button mat-icon-button (click)="logout()" class="text-red-400 hover:text-red-500 hover:bg-red-50 transition-colors" title="Logout">
-              <mat-icon>logout</mat-icon>
+            <a role="button" title="Quick Settings" tabindex="0" (keydown.enter)="activeSection.set('settings'); isRightSidebarOpen.set(false)" (click)="activeSection.set('settings'); isRightSidebarOpen.set(false)" class="flex items-center justify-center w-14 h-14 rounded-2xl transition-all cursor-pointer group" [ngClass]="activeSection() === 'settings' ? 'bg-primary text-white shadow-md' : 'text-slate-400 hover:bg-white/5'">
+              <mat-icon [class.scale-110]="activeSection() === 'settings'" class="transition-transform group-hover:scale-110 !text-2xl">settings</mat-icon>
+            </a>
+            <button title="Sign Out" (click)="logout()" class="flex items-center justify-center w-14 h-14 rounded-2xl transition-all cursor-pointer group bg-rose-500/10 text-rose-400 hover:bg-rose-500/20">
+              <mat-icon class="transition-transform group-hover:scale-110 !text-2xl">logout</mat-icon>
             </button>
           </div>
         </div>
@@ -194,7 +173,7 @@ interface ServiceJob {
           <div [class.hidden]="activeSection() !== 'dashboard'">
             <div class="mb-8">
               <h1 class="text-3xl font-display font-black text-secondary leading-tight">Dashboard Overview</h1>
-              <p class="text-slate-500 text-sm mt-1 font-medium">Real-time solar grid & business analytics</p>
+              <p class="text-slate-800 text-sm mt-1 font-medium">Real-time solar grid & business analytics</p>
             </div>
 
           <!-- Stats Grid -->
@@ -215,7 +194,7 @@ interface ServiceJob {
                     </span>
                   </div>
                   <h3 class="text-4xl font-display font-black text-secondary mb-1 tracking-tight">{{stat.value}}</h3>
-                  <p class="text-slate-500 text-[11px] font-bold uppercase tracking-widest">{{stat.label}}</p>
+                  <p class="text-slate-800 text-[11px] font-bold uppercase tracking-widest">{{stat.label}}</p>
                 </div>
               </div>
             }
@@ -232,7 +211,7 @@ interface ServiceJob {
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-6">
                   <div>
                     <h3 class="font-display font-black text-secondary text-xl">Project Status Records</h3>
-                    <p class="text-xs text-slate-500 mt-1 font-medium">Monitoring and managing historical and current Project Status</p>
+                    <p class="text-xs text-slate-800 mt-1 font-medium">Monitoring and managing historical and current Project Status</p>
                   </div>
                   <div class="flex flex-wrap items-center gap-3">
                     <button mat-stroked-button [matMenuTriggerFor]="projectPdfStatusMenu" class="!rounded-xl !border-slate-200 hover:!bg-slate-50 transition-colors py-5 !px-5">
@@ -341,12 +320,9 @@ interface ServiceJob {
                       <h3 class="text-2xl font-black font-display text-secondary leading-tight">
                         {{ selectedAdminProject()!.id ? 'Project Details' : 'New Installation' }}
                       </h3>
-                      <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">ID: {{selectedAdminProject()!.id || 'AUTO'}} • {{selectedAdminProject()!.status}}</p>
+                      <p class="text-xs font-bold text-slate-800 uppercase tracking-widest mt-1">ID: {{selectedAdminProject()!.id || 'AUTO'}} • {{selectedAdminProject()!.status}}</p>
                     </div>
                   </div>
-                  <button mat-icon-button (click)="selectedAdminProject.set(null)" class="text-slate-400 hover:text-secondary hover:bg-slate-50 transition-colors">
-                    <mat-icon>close</mat-icon>
-                  </button>
                 </div>
                 
                 <!-- Body -->
@@ -464,7 +440,7 @@ interface ServiceJob {
             <div class="mb-8 flex flex-col items-start gap-4 pl-1">
               <div>
                 <h1 class="text-3xl font-display font-black text-secondary leading-tight">Manage Services</h1>
-                <p class="text-slate-500 text-sm mt-1 font-medium">Configure and update your service offerings</p>
+                <p class="text-slate-800 text-sm mt-1 font-medium">Configure and update your service offerings</p>
               </div>
               <button mat-flat-button (click)="createNewService()" class="!rounded-full !bg-primary !text-white !font-bold !px-6 !py-5 shadow-lg shadow-blue-500/20 hover:scale-105 transition-transform w-full sm:w-auto">
                 <mat-icon>add</mat-icon> New Service
@@ -528,12 +504,9 @@ interface ServiceJob {
                         <h3 class="text-2xl font-bold font-display text-secondary leading-tight">
                           {{ selectedService()!.id ? 'Edit Service' : 'Create New Service' }}
                         </h3>
-                        <p class="text-xs font-bold text-slate-400 mt-0.5">Customize service details and steps</p>
+                        <p class="text-xs font-bold text-slate-800 mt-0.5">Customize service details and steps</p>
                       </div>
                     </div>
-                    <button mat-icon-button (click)="selectedService.set(null)" class="text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors">
-                      <mat-icon>close</mat-icon>
-                    </button>
                   </div>
                   
                   <!-- Body -->
@@ -628,7 +601,7 @@ interface ServiceJob {
                             }
                             @if (!selectedService()!.process || selectedService()!.process.length === 0) {
                               <div class="flex flex-col items-baseline justify-center py-8 px-4 text-center border border-dashed border-slate-300 rounded-2xl bg-white">
-                                <p class="text-xs font-bold text-slate-400 italic w-full">No process steps added.</p>
+                                <p class="text-xs font-bold text-slate-800 w-full">No process steps added.</p>
                               </div>
                             }
                           </div>
@@ -660,7 +633,7 @@ interface ServiceJob {
             <div class="mb-8 flex flex-col items-start gap-4 pl-1">
               <div>
                 <h1 class="text-3xl font-display font-black text-secondary leading-tight">Website Products</h1>
-                <p class="text-slate-500 text-sm mt-1 font-medium">Manage solar products, inventory, and pricing</p>
+                <p class="text-slate-800 text-sm mt-1 font-medium">Manage solar products, inventory, and pricing</p>
               </div>
               <button mat-flat-button (click)="createNewProduct()" class="!rounded-full !bg-emerald-500 !text-white !font-bold !px-6 !py-5 shadow-lg shadow-emerald-500/20 hover:scale-105 transition-transform w-full sm:w-auto">
                 <mat-icon>add</mat-icon> New Product
@@ -730,12 +703,9 @@ interface ServiceJob {
                         <h3 class="text-2xl font-bold font-display text-secondary leading-tight">
                           {{ selectedProduct()!.id ? 'Edit Product' : 'Create New Product' }}
                         </h3>
-                        <p class="text-xs font-bold text-slate-400 mt-0.5">Manage inventory details and product gallery</p>
+                        <p class="text-xs font-bold text-slate-800 mt-0.5">Manage inventory details and product gallery</p>
                       </div>
                     </div>
-                    <button mat-icon-button (click)="selectedProduct.set(null)" class="text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors">
-                      <mat-icon>close</mat-icon>
-                    </button>
                   </div>
                   
                   <!-- Body -->
@@ -813,7 +783,7 @@ interface ServiceJob {
                           <div class="flex justify-between items-center mb-4 shrink-0">
                             <div>
                               <h4 class="text-sm font-bold text-secondary flex items-center gap-2"><mat-icon class="text-slate-400">collections</mat-icon> Product Gallery</h4>
-                              <p class="text-[10px] text-slate-400 font-medium">Reorder or add multiple photos</p>
+                              <p class="text-[10px] text-slate-800 font-medium">Reorder or add multiple photos</p>
                             </div>
                             <button mat-flat-button class="!bg-emerald-50 !text-emerald-600 !font-bold !rounded-xl !h-[36px] relative overflow-hidden px-4 hover:!bg-emerald-100 transition-colors">
                               <span class="flex items-center gap-1.5"><mat-icon class="!text-[16px]">add_photo_alternate</mat-icon> <span class="hidden sm:inline">Upload Multiple</span></span>
@@ -835,8 +805,8 @@ interface ServiceJob {
                               <mat-icon class="!text-[24px]">cloud_upload</mat-icon>
                             </div>
                             <div class="text-center">
-                              <p class="text-xs font-bold text-slate-600">Drop images here</p>
-                              <p class="text-[10px] text-slate-400">or click the upload button above</p>
+                              <p class="text-xs font-bold text-slate-800">Drop images here</p>
+                              <p class="text-[10px] text-slate-800">or click the upload button above</p>
                             </div>
                           </div>
                           
@@ -891,7 +861,7 @@ interface ServiceJob {
                             @if (!selectedProduct()!.images || selectedProduct()!.images.length === 0) {
                               <div class="flex flex-col items-center justify-center py-10 px-4 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-white">
                                 <mat-icon class="text-slate-300 !w-12 !h-12 !text-[48px] mb-3 relative">cloud_upload</mat-icon>
-                                <p class="text-sm font-bold text-slate-500 mb-2">No product photos added</p>
+                                <p class="text-sm font-bold text-slate-800 mb-2">No product photos added</p>
                                 <button mat-flat-button class="!bg-emerald-500 !text-white !font-bold !rounded-xl relative overflow-hidden shadow-lg shadow-emerald-500/20">
                                   <span class="flex items-center gap-2"><mat-icon class="!text-[18px]">file_upload</mat-icon> Browse Files</span>
                                   <input type="file" multiple accept="image/*" (change)="onImageUpload($event, 'product', selectedProduct()!.images.length)" class="absolute inset-0 opacity-0 cursor-pointer">
@@ -909,7 +879,7 @@ interface ServiceJob {
                             </div>
                             <button mat-button class="!text-emerald-600 !font-bold !text-xs !py-0 !h-8 bg-emerald-50 rounded-lg hover:bg-emerald-100" (click)="addProductSpec()">+ Add Spec</button>
                           </div>
-                          <div class="space-y-3 overflow-y-auto max-h-[300px] pr-2 custom-scrollbar">
+                          <div class="space-y-3 overflow-y-auto scroll-smooth max-h-[300px] pr-2 custom-scrollbar">
                             @for (spec of selectedProduct()!.specs; track $index; let i = $index) {
                               <div class="flex gap-2 items-center bg-slate-50 p-2 rounded-xl border border-slate-100 relative group/spec">
                                 <input type="text" [(ngModel)]="selectedProduct()!.specs[i].label" class="w-1/3 min-w-[100px] bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-xs font-bold text-secondary focus:border-emerald-500 outline-none transition-all shadow-sm" placeholder="Label">
@@ -921,7 +891,7 @@ interface ServiceJob {
                             }
                             @if (!selectedProduct()!.specs || selectedProduct()!.specs.length === 0) {
                               <div class="py-6 px-4 text-center border border-dashed border-slate-200 rounded-xl bg-slate-50">
-                                <p class="text-xs font-bold text-slate-400 italic">No specifications defined</p>
+                                <p class="text-xs font-bold text-slate-800">No specifications defined</p>
                               </div>
                             }
                           </div>
@@ -950,7 +920,7 @@ interface ServiceJob {
                             }
                             @if (!selectedProduct()!.features || selectedProduct()!.features.length === 0) {
                               <div class="py-6 px-4 text-center border border-dashed border-slate-200 rounded-xl bg-slate-50">
-                                <p class="text-xs font-bold text-slate-400 italic">No badges defined</p>
+                                <p class="text-xs font-bold text-slate-800">No badges defined</p>
                               </div>
                             }
                           </div>
@@ -982,7 +952,7 @@ interface ServiceJob {
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-8">
               <div>
                 <h1 class="text-3xl font-display font-black text-secondary leading-tight">Service Job Orders</h1>
-                <p class="text-slate-500 text-sm mt-1 font-medium">Monitor and manage upcoming technical service requests</p>
+                <p class="text-slate-800 text-sm mt-1 font-medium">Monitor and manage upcoming technical service requests</p>
               </div>
               <div class="flex items-center gap-3 w-full sm:w-auto">
                 <button mat-stroked-button [matMenuTriggerFor]="servicePdfStatusMenu" class="!rounded-xl !border-slate-200 hover:!bg-slate-50 transition-colors w-full sm:w-auto py-5 !px-5">
@@ -1036,7 +1006,7 @@ interface ServiceJob {
                   </thead>
                   <tbody class="divide-y divide-slate-50">
                     @for (job of filteredServiceJobs(); track job.id) {
-                      <tr class="hover:bg-slate-50/50 transition-colors group">
+                      <tr class="hover:bg-slate-50/50 transition-colors group cursor-pointer" (click)="editServiceJob(job)">
                         <td class="px-8 py-5">
                           <span class="text-xs font-mono font-bold text-slate-400">#{{job.id}}</span>
                         </td>
@@ -1099,7 +1069,7 @@ interface ServiceJob {
                          <mat-icon class="!text-slate-200 !text-4xl text-inherit">assignment_late</mat-icon>
                       </div>
                       <h4 class="text-secondary font-bold">No job orders found</h4>
-                      <p class="text-slate-400 text-xs mt-1">Try adjusting your filters or create a new job entry.</p>
+                      <p class="text-slate-800 text-xs mt-1">Try adjusting your filters or create a new job entry.</p>
                    </div>
                 }
               </div>
@@ -1110,7 +1080,7 @@ interface ServiceJob {
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-8">
               <div>
                 <h1 class="text-3xl font-display font-black text-secondary leading-tight">Edit Website</h1>
-                <p class="text-slate-500 text-sm mt-1 font-medium">Customize your landing page and public portal</p>
+                <p class="text-slate-800 text-sm mt-1 font-medium">Customize your landing page and public portal</p>
               </div>
               <div class="flex items-center gap-3 w-full sm:w-auto">
                 <button mat-stroked-button (click)="previewWebsite()" class="!rounded-xl !border-primary !text-primary !font-bold !px-6 w-full sm:w-auto hover:!bg-primary/5">
@@ -1142,7 +1112,7 @@ interface ServiceJob {
                        <mat-icon class="text-primary !w-8 !h-8 !text-[32px] leading-[32px]">home</mat-icon> 
                        Home Page Configuration
                     </h3>
-                    <p class="text-slate-400 text-xs mt-1 font-bold uppercase tracking-widest">Global Sections & Elements</p>
+                    <p class="text-slate-800 text-xs mt-1 font-bold uppercase tracking-widest">Global Sections & Elements</p>
                   </div>
                   <div class="hidden sm:flex items-center gap-2 bg-slate-50 dark:bg-slate-900 px-4 py-2 rounded-xl border border-slate-100 dark:border-slate-800">
                     <mat-icon class="text-slate-400 !text-sm">info</mat-icon>
@@ -1161,7 +1131,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Hero Configuration</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Main Banner & Intro Text</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Main Banner & Intro Text</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'hero'">expand_more</mat-icon>
@@ -1198,7 +1168,7 @@ interface ServiceJob {
                               </div>
                             }
                           </div>
-                          <p class="text-[9px] text-slate-400 font-bold mt-3 uppercase tracking-wider italic px-1">* Images will auto-play as a carousel on the home page. Ideal size: 1920x1080px.</p>
+                          <p class="text-[9px] text-slate-800 font-bold mt-3 uppercase tracking-wider px-1">* Images will auto-play as a carousel on the home page. Ideal size: 1920x1080px.</p>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -1241,7 +1211,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Partner Ecosystem</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Scrolling Brands & Suppliers</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Scrolling Brands & Suppliers</p>
                         </div>
                       </div>
                       <div class="flex items-center gap-4">
@@ -1255,7 +1225,7 @@ interface ServiceJob {
                         <div class="h-px bg-slate-200 dark:bg-slate-800 mb-8"></div>
                         
                         <div class="flex justify-between items-center mb-6">
-                           <p class="text-[10px] font-black text-slate-400 uppercase tracking-widst">Managed Brand Cards</p>
+                           <p class="text-[10px] font-black text-slate-800 uppercase tracking-widst">Managed Brand Cards</p>
                            <button mat-flat-button class="!bg-primary !text-white !font-black !rounded-xl shadow-lg shadow-primary/20" (click)="addBrand()">
                              <mat-icon class="!text-sm">add</mat-icon> New Brand
                            </button>
@@ -1330,7 +1300,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Why Choose Us</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Core Values & Features</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Core Values & Features</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'features'">expand_more</mat-icon>
@@ -1356,7 +1326,7 @@ interface ServiceJob {
                         </div>
 
                         <div class="flex justify-between items-center mb-4">
-                           <p class="text-[10px] font-black text-slate-400 uppercase tracking-widst">Feature Cards</p>
+                           <p class="text-[10px] font-black text-slate-800 uppercase tracking-widst">Feature Cards</p>
                            <button mat-flat-button class="!bg-primary/10 !text-primary !font-black !rounded-xl" (click)="addHomeFeature()">
                              <mat-icon class="!text-sm">add</mat-icon> Add Feature
                            </button>
@@ -1408,7 +1378,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Our Portfolio</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Project Showcases & Gallery</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Project Showcases & Gallery</p>
                         </div>
                       </div>
                       <div class="flex items-center gap-4">
@@ -1563,7 +1533,7 @@ interface ServiceJob {
                                          }
                                          @if (!websiteData().home.projects[i].gallery?.length) {
                                            <div class="col-span-full py-8 text-center bg-slate-50/50 dark:bg-slate-900/50 rounded-2xl border-2 border-dashed border-slate-100 dark:border-slate-800">
-                                              <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Gallery Empty</p>
+                                              <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest">Gallery Empty</p>
                                            </div>
                                          }
                                        </div>
@@ -1587,7 +1557,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Our Expertise</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Nature of Business</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Nature of Business</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'expertise'">expand_more</mat-icon>
@@ -1661,7 +1631,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Promotional Video</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Video MP4 & Live Stats</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Video MP4 & Live Stats</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'video'">expand_more</mat-icon>
@@ -1725,7 +1695,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Testimonials</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Customer Reviews & Peer Proof</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Customer Reviews & Peer Proof</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'testimonials'">expand_more</mat-icon>
@@ -1786,7 +1756,7 @@ interface ServiceJob {
                                   </div>
                                   <div>
                                      <div class="block text-[9px] font-black text-slate-400 uppercase mb-1.5 px-1">The Verification Quote</div>
-                                     <textarea [(ngModel)]="item.quote" rows="4" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[1.25rem] px-5 py-4 text-sm italic font-medium text-slate-600 outline-none focus:ring-1 focus:ring-primary transition-all resize-none shadow-inner"></textarea>
+                                     <textarea [(ngModel)]="item.quote" rows="4" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[1.25rem] px-5 py-4 text-sm font-medium text-slate-600 outline-none focus:ring-1 focus:ring-primary transition-all resize-none shadow-inner"></textarea>
                                   </div>
                                 </div>
                               </div>
@@ -1806,7 +1776,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Call to Action</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Global Conversion Banner</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Global Conversion Banner</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'cta'">expand_more</mat-icon>
@@ -1850,7 +1820,7 @@ interface ServiceJob {
                        <mat-icon class="text-primary !w-8 !h-8 !text-[32px] leading-[32px]">handyman</mat-icon> 
                        Services Configuration
                     </h3>
-                    <p class="text-slate-400 text-xs mt-1 font-bold uppercase tracking-widest">Global Page Elements & Secondary Content</p>
+                    <p class="text-slate-800 text-xs mt-1 font-bold uppercase tracking-widest">Global Page Elements & Secondary Content</p>
                   </div>
                 </div>
 
@@ -1864,7 +1834,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Banner & Header</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Page Hero & Title</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Page Hero & Title</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'serv-header'">expand_more</mat-icon>
@@ -1925,7 +1895,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Secondary Narrative</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Detailed Service Context</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Detailed Service Context</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'serv-secondary'">expand_more</mat-icon>
@@ -1959,7 +1929,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Service Detail Pages</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Edit specific service page content</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Edit specific service page content</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'serv-details'">expand_more</mat-icon>
@@ -2100,7 +2070,7 @@ interface ServiceJob {
                        <mat-icon class="text-primary !w-8 !h-8 !text-[32px] leading-[32px]">inventory_2</mat-icon> 
                        Products Configuration
                     </h3>
-                    <p class="text-slate-400 text-xs mt-1 font-bold uppercase tracking-widest">Main Landing & Collections Elements</p>
+                    <p class="text-slate-800 text-xs mt-1 font-bold uppercase tracking-widest">Main Landing & Collections Elements</p>
                   </div>
                 </div>
 
@@ -2114,7 +2084,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Banner & Header</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Landing Hero Configuration</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Landing Hero Configuration</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'prod-header'">expand_more</mat-icon>
@@ -2175,7 +2145,7 @@ interface ServiceJob {
                        <mat-icon class="text-primary !w-8 !h-8 !text-[32px] leading-[32px]">info</mat-icon> 
                        About Configuration
                     </h3>
-                    <p class="text-slate-400 text-xs mt-1 font-bold uppercase tracking-widest">Brand Discovery & Identity Settings</p>
+                    <p class="text-slate-800 text-xs mt-1 font-bold uppercase tracking-widest">Brand Discovery & Identity Settings</p>
                   </div>
                 </div>
 
@@ -2189,7 +2159,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Banner & Header</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Hero Intro Configuration</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Hero Intro Configuration</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'about-header'">expand_more</mat-icon>
@@ -2249,7 +2219,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Our Story</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">The Blucid Origins & Journey</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">The Blucid Origins & Journey</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'about-story'">expand_more</mat-icon>
@@ -2281,7 +2251,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Philosophy</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Mission, Vision & Core Values</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Mission, Vision & Core Values</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'about-philosophy'">expand_more</mat-icon>
@@ -2317,7 +2287,7 @@ interface ServiceJob {
                        <mat-icon class="text-primary !w-8 !h-8 !text-[32px] leading-[32px]">contact_support</mat-icon> 
                        Contact Configuration
                     </h3>
-                    <p class="text-slate-400 text-xs mt-1 font-bold uppercase tracking-widest">Connectability & Logistics Elements</p>
+                    <p class="text-slate-800 text-xs mt-1 font-bold uppercase tracking-widest">Connectability & Logistics Elements</p>
                   </div>
                 </div>
 
@@ -2331,7 +2301,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Banner & Header</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Introduction & Visuals</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Introduction & Visuals</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'cont-header'">expand_more</mat-icon>
@@ -2391,7 +2361,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Branch Info</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Physical Location & Primary Contacts</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Physical Location & Primary Contacts</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'cont-core'">expand_more</mat-icon>
@@ -2433,7 +2403,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Operations</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Working Hours & Form Headers</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Working Hours & Form Headers</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'cont-details'">expand_more</mat-icon>
@@ -2472,7 +2442,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Secondary Connections</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Social Networks & Custom Links</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Social Networks & Custom Links</p>
                         </div>
                       </div>
                       <div class="flex items-center gap-4">
@@ -2486,7 +2456,7 @@ interface ServiceJob {
                         <div class="h-px bg-slate-200 dark:bg-slate-800 mb-8"></div>
                         
                         <div class="flex justify-between items-center mb-6">
-                           <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Connectability Cards</p>
+                           <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest">Connectability Cards</p>
                            <button mat-flat-button class="!bg-primary/10 !text-primary !font-black !rounded-xl" (click)="addContactMethod()">
                              <mat-icon class="!text-sm">add</mat-icon> Add Link
                            </button>
@@ -2523,7 +2493,7 @@ interface ServiceJob {
                        <mat-icon class="text-primary !w-8 !h-8 !text-[32px] leading-[32px]">quiz</mat-icon> 
                        FAQ Configuration
                     </h3>
-                    <p class="text-slate-400 text-xs mt-1 font-bold uppercase tracking-widest">Help Center & Self-Service Content</p>
+                    <p class="text-slate-800 text-xs mt-1 font-bold uppercase tracking-widest">Help Center & Self-Service Content</p>
                   </div>
                 </div>
 
@@ -2537,7 +2507,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Banner & Header</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Intro Narrative & Visuals</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Intro Narrative & Visuals</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'faq-header'">expand_more</mat-icon>
@@ -2598,7 +2568,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Knowledge Base</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Questions & Answers Management</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Questions & Answers Management</p>
                         </div>
                       </div>
                       <div class="flex items-center gap-4">
@@ -2612,7 +2582,7 @@ interface ServiceJob {
                         <div class="h-px bg-slate-200 dark:bg-slate-800 mb-8"></div>
                         
                         <div class="flex justify-between items-center mb-8">
-                           <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Entry Catalog</p>
+                           <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest">Entry Catalog</p>
                            <button mat-flat-button class="!bg-primary/10 !text-primary !font-black !rounded-xl" (click)="addFaqItem()">
                              <mat-icon class="!text-sm">add_box</mat-icon> New FAQ Entry
                            </button>
@@ -2652,7 +2622,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Assistance Callout</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Secondary Support Options</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Secondary Support Options</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'faq-cta'">expand_more</mat-icon>
@@ -2688,7 +2658,7 @@ interface ServiceJob {
                        <mat-icon class="text-primary !w-8 !h-8 !text-[32px] leading-[32px]">footer</mat-icon> 
                        Footer Configuration
                     </h3>
-                    <p class="text-slate-400 text-xs mt-1 font-bold uppercase tracking-widest">Global Persistent Elements & Identity</p>
+                    <p class="text-slate-800 text-xs mt-1 font-bold uppercase tracking-widest">Global Persistent Elements & Identity</p>
                   </div>
                 </div>
 
@@ -2702,7 +2672,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Brand Identity</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Logo URL & Company Brief</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Logo URL & Company Brief</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'foot-brand'">expand_more</mat-icon>
@@ -2756,7 +2726,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Quick Contact</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Footer-Specific Address & Phone</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Footer-Specific Address & Phone</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'foot-contact'">expand_more</mat-icon>
@@ -2792,7 +2762,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Hours & Legal</h4>
-                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Schedule & Copyright Narrative</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Schedule & Copyright Narrative</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'foot-legal'">expand_more</mat-icon>
@@ -2823,7 +2793,7 @@ interface ServiceJob {
             <div class="mb-8 flex flex-col items-start gap-4 pl-1">
               <div>
                 <h1 class="text-3xl font-display font-black text-secondary leading-tight">Admin Profile</h1>
-                <p class="text-slate-500 text-sm mt-1 font-medium">Manage your personal information and security credentials</p>
+                <p class="text-slate-800 text-sm mt-1 font-medium">Manage your personal information and security credentials</p>
               </div>
             </div>
             
@@ -2892,7 +2862,7 @@ interface ServiceJob {
             <div class="mb-8 flex flex-col items-start gap-4 pl-1">
               <div>
                 <h1 class="text-3xl font-display font-black text-secondary leading-tight">Website Customer Inquiries</h1>
-                <p class="text-slate-500 text-sm mt-1 font-medium">Review and respond to quote requests submitted from the website</p>
+                <p class="text-slate-800 text-sm mt-1 font-medium">Review and respond to quote requests submitted from the website</p>
               </div>
             </div>
 
@@ -2914,11 +2884,21 @@ interface ServiceJob {
                   </thead>
                   <tbody class="divide-y divide-slate-50">
                     @for (inquiry of filteredInquiries(); track inquiry.id) {
-                      <tr class="group hover:bg-slate-50 transition-colors">
+                      <tr class="group hover:bg-slate-50 transition-colors cursor-pointer" (click)="viewInquiryDetails(inquiry)">
                         <td class="px-8 py-5">
-                          <div class="flex flex-col">
-                            <span class="font-bold text-secondary text-sm">{{inquiry.customerName}}</span>
-                            <span class="text-xs text-slate-400">{{inquiry.email}}</span>
+                          <div class="flex items-center gap-3">
+                            @if (inquiry.status === 'new') {
+                              <div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)]"></div>
+                            }
+                            <div class="flex flex-col">
+                              <span class="font-bold text-secondary text-sm flex items-center gap-2">
+                                {{inquiry.customerName}}
+                                @if (inquiry.status === 'new') {
+                                  <span class="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary text-[8px] font-black uppercase tracking-tight leading-none border border-primary/20">NEW</span>
+                                }
+                              </span>
+                              <span class="text-xs text-slate-400">{{inquiry.email}}</span>
+                            </div>
                           </div>
                         </td>
                         <td class="px-8 py-5">
@@ -2957,7 +2937,7 @@ interface ServiceJob {
                         <td colspan="5" class="px-8 py-20 text-center">
                           <div class="flex flex-col items-center">
                             <mat-icon class="!w-16 !h-16 !text-[64px] text-slate-100 mb-4">mail_outline</mat-icon>
-                            <p class="text-slate-400 font-bold">No customer inquiries found.</p>
+                            <p class="text-slate-800 font-bold">No customer inquiries found.</p>
                           </div>
                         </td>
                       </tr>
@@ -2972,7 +2952,7 @@ interface ServiceJob {
             <div class="mb-8 flex flex-col items-start gap-4 pl-1">
               <div>
                 <h1 class="text-3xl font-display font-black text-secondary leading-tight">System Settings</h1>
-                <p class="text-slate-500 text-sm mt-1 font-medium">Configure global application infrastructure and preferences</p>
+                <p class="text-slate-800 text-sm mt-1 font-medium">Configure global application infrastructure and preferences</p>
               </div>
             </div>
 
@@ -2985,7 +2965,7 @@ interface ServiceJob {
                   </div>
                   <div>
                     <h3 class="text-xl font-bold text-secondary">General Preference</h3>
-                    <p class="text-xs text-slate-400 uppercase tracking-widest font-black mt-1">Global UX & Interface</p>
+                    <p class="text-xs text-slate-800 uppercase tracking-widest font-black mt-1">Global UX & Interface</p>
                   </div>
                 </div>
 
@@ -2999,14 +2979,14 @@ interface ServiceJob {
                         </div>
                         <div>
                           <p class="text-sm font-bold text-secondary leading-tight">Force Dark Interface</p>
-                          <p class="text-[10px] text-slate-500 mt-1 uppercase tracking-wider font-black">Overrides system defaults</p>
+                          <p class="text-[10px] text-slate-800 mt-1 uppercase tracking-wider font-black">Overrides system defaults</p>
                         </div>
                       </div>
                       <div (click)="toggleDarkMode()" (keydown.enter)="toggleDarkMode()" role="button" tabindex="0" class="relative w-12 h-6 rounded-full cursor-pointer transition-colors duration-300" [class.bg-primary]="isDarkMode()" [class.bg-slate-200]="!isDarkMode()">
                         <div class="absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-300 shadow-sm" [class.translate-x-6]="isDarkMode()"></div>
                       </div>
                     </div>
-                    <p class="text-[11px] text-slate-400 leading-relaxed pl-14">The dark interface reduces eye strain and power consumption on high-end displays. This setting is saved globally for your account.</p>
+                    <p class="text-[11px] text-slate-800 leading-relaxed pl-14">The dark interface reduces eye strain and power consumption on high-end displays. This setting is saved globally for your account.</p>
                   </div>
 
                   <!-- Preference Item 2: Notifications -->
@@ -3018,7 +2998,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <p class="text-sm font-bold text-secondary leading-tight">Critical Email Alerts</p>
-                          <p class="text-[10px] text-slate-500 mt-1 uppercase tracking-wider font-black">Lead & Security notifications</p>
+                          <p class="text-[10px] text-slate-800 mt-1 uppercase tracking-wider font-black">Lead & Security notifications</p>
                         </div>
                       </div>
                       <div (click)="settingsData().emailNotifications = !settingsData().emailNotifications" (keydown.enter)="settingsData().emailNotifications = !settingsData().emailNotifications" role="button" tabindex="0" class="relative w-12 h-6 rounded-full cursor-pointer transition-colors duration-300" [class.bg-primary]="settingsData().emailNotifications" [class.bg-slate-200]="!settingsData().emailNotifications">
@@ -3043,7 +3023,7 @@ interface ServiceJob {
                   </div>
                   <div>
                     <h3 class="text-xl font-bold text-secondary">Advanced Infrastructure</h3>
-                    <p class="text-xs text-slate-400 uppercase tracking-widest font-black mt-1">Data Storage & Integrity</p>
+                    <p class="text-xs text-slate-800 uppercase tracking-widest font-black mt-1">Data Storage & Integrity</p>
                   </div>
                 </div>
 
@@ -3057,7 +3037,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <p class="text-sm font-bold text-secondary leading-tight">Automated Cloud Sync</p>
-                          <p class="text-[10px] text-slate-500 mt-1 uppercase tracking-wider font-black">Real-time background backup</p>
+                          <p class="text-[10px] text-slate-800 mt-1 uppercase tracking-wider font-black">Real-time background backup</p>
                         </div>
                       </div>
                       <div (click)="settingsData().autoSync = !settingsData().autoSync" (keydown.enter)="settingsData().autoSync = !settingsData().autoSync" role="button" tabindex="0" class="relative w-12 h-6 rounded-full cursor-pointer transition-colors duration-300" [class.bg-primary]="settingsData().autoSync" [class.bg-slate-200]="!settingsData().autoSync">
@@ -3078,7 +3058,7 @@ interface ServiceJob {
                   </div>
 
                   <div class="pt-2">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 ml-1">System Health Control</p>
+                    <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-4 ml-1">System Health Control</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <button (click)="exportCSV()" mat-stroked-button class="!rounded-2xl !border-slate-200 !text-secondary !font-bold !py-8 hover:!bg-slate-50 transition-all !w-full">
                         <span class="flex items-center gap-2 justify-center"><mat-icon class="!text-[18px]">cloud_download</mat-icon> System Audit LOG</span>
@@ -3118,12 +3098,9 @@ interface ServiceJob {
                 </div>
                 <div>
                   <h3 class="text-2xl font-black font-display text-secondary leading-tight">{{selectedServiceJob()?.id === 0 ? 'File New Service' : 'Update Job Order'}}</h3>
-                  <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Technical Service Tracking</p>
+                  <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Technical Service Tracking</p>
                 </div>
               </div>
-              <button mat-icon-button (click)="selectedServiceJob.set(null)" class="text-slate-300 hover:text-secondary hover:bg-slate-50 transition-colors !w-12 !h-12 rounded-xl">
-                <mat-icon class="!text-2xl">close</mat-icon>
-              </button>
             </div>
 
             <!-- Content -->
@@ -3244,64 +3221,61 @@ interface ServiceJob {
 
       <!-- System Notifications Modal -->
       @if (showNotificationsModal()) {
-        <div class="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6">
+        <div class="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-6">
           <div role="button" tabindex="0" (keydown.enter)="showNotificationsModal.set(false)" class="absolute inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity" (click)="showNotificationsModal.set(false)"></div>
-          <div class="bg-white rounded-[2.5rem] shadow-2xl relative w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-400">
+          <div class="bg-white rounded-t-[2rem] sm:rounded-[2.5rem] shadow-2xl relative w-full max-w-2xl h-[90vh] sm:h-auto sm:max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-10 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-400">
             <!-- Header -->
-            <div class="flex items-center justify-between p-8 sm:px-12 border-b border-slate-100 bg-white/80 backdrop-blur-xl z-10">
-              <div class="flex items-center gap-6">
-                <div class="w-16 h-16 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center shadow-inner">
-                   <mat-icon class="!text-3xl">notifications_active</mat-icon>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between p-6 sm:p-8 sm:px-12 border-b border-slate-100 bg-white/80 backdrop-blur-xl z-10 gap-4 sm:gap-0 relative">
+              <div class="flex items-center gap-4 sm:gap-6">
+                <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center shadow-inner shrink-0">
+                   <mat-icon class="!text-2xl sm:!text-3xl">notifications_active</mat-icon>
                 </div>
                 <div>
-                  <h3 class="text-2xl font-black font-display text-secondary tracking-tight">System Notifications</h3>
-                  <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1 pl-0.5">Real-time alerts & logs</p>
+                  <h3 class="text-xl sm:text-2xl font-black font-display text-secondary tracking-tight leading-tight">System Notifications</h3>
+                  <p class="text-[9px] sm:text-[10px] font-black text-slate-800 uppercase tracking-[0.1em] sm:tracking-[0.2em] mt-1 pl-0.5">Real-time alerts & logs</p>
                 </div>
               </div>
-              <button mat-icon-button (click)="showNotificationsModal.set(false)" class="text-slate-300 hover:text-secondary hover:bg-slate-50 transition-all !w-12 !h-12 rounded-2xl">
-                <mat-icon class="!text-2xl">close</mat-icon>
-              </button>
             </div>
 
             <!-- Content -->
-            <div class="p-8 sm:px-12 overflow-y-auto bg-slate-50/30 scrollbar-thin flex-grow">
+            <div class="p-4 sm:p-8 sm:px-12 overflow-y-auto bg-slate-50/30 scrollbar-thin flex-grow">
               @if (notifications().length > 0) {
-                <div class="space-y-4 py-2">
+                <div class="space-y-3 sm:space-y-4 py-2">
                   @for (notif of notifications(); track notif.id) {
-                    <div class="flex items-center gap-5 p-5 bg-white rounded-3xl border border-slate-200/60 shadow-sm hover:shadow-lg hover:border-primary/20 transition-all group relative overflow-hidden">
-                      <div [class]="'w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ' + notif.color">
-                        <mat-icon class="!text-xl">{{notif.icon}}</mat-icon>
+                    <div class="flex items-start sm:items-center gap-3 sm:gap-5 p-4 sm:p-5 bg-white rounded-2xl sm:rounded-3xl border border-slate-200/60 shadow-sm hover:shadow-lg hover:border-primary/20 transition-all group relative overflow-hidden">
+                      <div [class]="'w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 shadow-sm ' + notif.color">
+                        <mat-icon class="!text-lg sm:!text-xl">{{notif.icon}}</mat-icon>
                       </div>
                       <div class="flex-grow">
-                        <div class="flex items-center justify-between mb-1">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-1 sm:mb-1 gap-1 sm:gap-0">
                           <p class="text-sm font-black text-secondary">{{notif.title}}</p>
-                          <span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full">{{notif.time}}</span>
+                          <span class="text-[9px] sm:text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full w-fit">{{notif.time}}</span>
                         </div>
-                        <p class="text-xs text-slate-500 font-medium leading-relaxed pr-8">{{notif.message}}</p>
+                        <p class="text-xs text-slate-800 font-medium leading-relaxed pr-6 sm:pr-8">{{notif.message}}</p>
                       </div>
-                      <button mat-icon-button (click)="removeNotification(notif.id)" class="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all rounded-xl">
-                        <mat-icon class="!text-lg">delete_outline</mat-icon>
+                      <button mat-icon-button (click)="removeNotification(notif.id)" class="absolute right-2 sm:right-4 top-4 sm:top-1/2 sm:-translate-y-1/2 sm:opacity-0 group-hover:opacity-100 text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all rounded-xl">
+                        <mat-icon class="!text-base sm:!text-lg">delete_outline</mat-icon>
                       </button>
                     </div>
                   }
                 </div>
               } @else {
-                <div class="flex flex-col items-center justify-center py-24 text-center">
-                  <div class="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6 border border-slate-200">
-                    <mat-icon class="!text-5xl text-slate-300">notifications_none</mat-icon>
+                <div class="flex flex-col items-center justify-center py-16 sm:py-24 text-center px-4">
+                  <div class="w-20 h-20 sm:w-24 sm:h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6 border border-slate-200">
+                    <mat-icon class="!text-4xl sm:!text-5xl text-slate-300">notifications_none</mat-icon>
                   </div>
-                  <h4 class="text-secondary font-black text-lg">No active alerts</h4>
-                  <p class="text-slate-400 text-sm mt-2 max-w-xs font-medium">Your system is running smoothly. New notifications will appear here as they arrive.</p>
+                  <h4 class="text-secondary font-black text-base sm:text-lg">No active alerts</h4>
+                  <p class="text-slate-800 text-xs sm:text-sm mt-2 max-w-xs font-medium">Your system is running smoothly. New notifications will appear here as they arrive.</p>
                 </div>
               }
             </div>
 
             <!-- Footer -->
-            <div class="p-8 sm:px-12 border-t border-slate-100 bg-white flex justify-between items-center z-10">
-              <button mat-button (click)="clearAllNotifications()" [disabled]="notifications().length === 0" class="!font-black !text-rose-500 hover:!bg-rose-50 rounded-2xl px-8 !py-6 transition-all disabled:opacity-30">
+            <div class="p-6 sm:p-8 sm:px-12 border-t border-slate-100 bg-white flex flex-col-reverse sm:flex-row justify-between items-center gap-4 sm:gap-0 z-10 relative">
+              <button mat-button (click)="clearAllNotifications()" [disabled]="notifications().length === 0" class="w-full sm:w-auto !font-black !text-rose-500 hover:!bg-rose-50 rounded-2xl px-6 sm:px-8 !py-5 sm:!py-6 transition-all disabled:opacity-30">
                 Clear All Logs
               </button>
-              <button mat-flat-button (click)="showNotificationsModal.set(false)" class="!rounded-2xl !bg-slate-900 !text-white !font-black !px-12 !py-6 hover:bg-secondary transition-all shadow-xl shadow-slate-200">
+              <button mat-flat-button (click)="showNotificationsModal.set(false)" class="w-full sm:w-auto !rounded-xl sm:!rounded-2xl !bg-slate-900 !text-white !font-black !px-8 sm:!px-12 !py-5 sm:!py-6 hover:bg-secondary transition-all shadow-xl shadow-slate-200">
                 Acknowledge
               </button>
             </div>
@@ -3321,12 +3295,9 @@ interface ServiceJob {
                 </div>
                 <div>
                   <h3 class="text-xl font-bold font-display text-secondary">Inquiry Details</h3>
-                  <p class="text-xs font-bold text-slate-400 font-mono tracking-tighter">ID: {{selectedInquiry()!.id}}</p>
+                  <p class="text-xs font-bold text-slate-800 font-mono tracking-tighter">ID: {{selectedInquiry()!.id}}</p>
                 </div>
               </div>
-              <button mat-icon-button (click)="selectedInquiry.set(null)" class="text-slate-400 hover:text-secondary hover:bg-slate-50">
-                <mat-icon>close</mat-icon>
-              </button>
             </div>
             <div class="p-6 sm:p-8 overflow-y-auto">
               <div class="space-y-8">
@@ -3392,7 +3363,7 @@ interface ServiceJob {
                 </div>
                 <div>
                   <h3 class="text-xl font-bold font-display text-secondary leading-tight">Preview: Our Services</h3>
-                  <p class="text-xs font-bold text-slate-400">Temporary Website Reflection</p>
+                  <p class="text-xs font-bold text-slate-800">Temporary Website Reflection</p>
                 </div>
               </div>
             </div>
@@ -3405,7 +3376,7 @@ interface ServiceJob {
                       <mat-icon class="text-3xl">{{service.icon}}</mat-icon>
                     </div>
                     <h3 class="relative z-10 text-2xl font-bold text-secondary mb-4">{{service.title}}</h3>
-                    <p class="relative z-10 text-slate-600 leading-relaxed mb-6 flex-grow">{{service.description}}</p>
+                    <p class="relative z-10 text-slate-800 leading-relaxed mb-6 flex-grow">{{service.description}}</p>
                     <ul class="relative z-10 space-y-3 mb-8">
                       @for (item of service.features; track item) {
                         <li class="flex items-center gap-3 text-sm text-slate-500">
@@ -3440,7 +3411,7 @@ interface ServiceJob {
                 </div>
                 <div>
                   <h3 class="text-xl font-bold font-display text-secondary leading-tight">Preview: Our Products</h3>
-                  <p class="text-xs font-bold text-slate-400">Temporary Website Reflection</p>
+                  <p class="text-xs font-bold text-slate-800">Temporary Website Reflection</p>
                 </div>
               </div>
             </div>
@@ -3464,7 +3435,7 @@ interface ServiceJob {
                     </div>
                     <div class="p-8">
                       <h3 class="text-xl font-bold text-secondary mb-2">{{prod.name}}</h3>
-                      <p class="text-slate-500 text-sm mb-6 leading-relaxed">{{prod.desc}}</p>
+                      <p class="text-slate-800 text-sm mb-6 leading-relaxed">{{prod.desc}}</p>
                       
                       <div class="flex flex-col gap-4">
                         <div class="flex items-center justify-between">
@@ -3529,10 +3500,10 @@ interface ServiceJob {
             <span class="text-[10px] sm:text-xs font-bold leading-none transition-all duration-300">Products</span>
           </button>
           
-          <button (click)="activeSection.set('website')" class="flex flex-col items-center justify-center w-full h-full gap-1 transition-colors relative" [ngClass]="activeSection() === 'website' ? 'text-primary' : 'text-slate-400 hover:text-slate-600'">
-            <div class="absolute top-0 w-8 h-1 rounded-b-full bg-primary transition-all duration-300" [class.opacity-0]="activeSection() !== 'website'" [class.scale-x-0]="activeSection() !== 'website'"></div>
-            <mat-icon [class.scale-110]="activeSection() === 'website'" class="transition-transform duration-300">public</mat-icon>
-            <span class="text-[10px] sm:text-xs font-bold leading-none transition-all duration-300">Website</span>
+          <button (click)="activeSection.set('jobs')" class="flex flex-col items-center justify-center w-full h-full gap-1 transition-colors relative" [ngClass]="activeSection() === 'jobs' ? 'text-primary' : 'text-slate-400 hover:text-slate-600'">
+            <div class="absolute top-0 w-8 h-1 rounded-b-full bg-primary transition-all duration-300" [class.opacity-0]="activeSection() !== 'jobs'" [class.scale-x-0]="activeSection() !== 'jobs'"></div>
+            <mat-icon [class.scale-110]="activeSection() === 'jobs'" class="transition-transform duration-300">assignment_turned_in</mat-icon>
+            <span class="text-[10px] sm:text-xs font-bold leading-none transition-all duration-300">Orders</span>
           </button>
         </div>
       </nav>
@@ -3562,8 +3533,25 @@ export class AdminDashboard implements AfterViewInit, OnInit {
   isDarkMode = signal(false);
   showNotificationsModal = signal(false);
   activeSection = signal<'dashboard'|'services'|'products'|'jobs'|'website'|'profile'|'settings'|'inquiries'>('dashboard');
+
   activeWebsiteTab = signal<'home'|'services'|'products'|'about'|'contact'|'faq'|'footer'>('home');
   selectedServiceDetailId = signal<string>('solar-installation');
+
+  newInquiriesCount = computed(() => this.adminInquiries().filter(i => i.status === 'new').length);
+  
+  activeSectionLabel = computed(() => {
+    switch (this.activeSection()) {
+      case 'dashboard': return 'Dashboard Overview';
+      case 'services': return 'Manage Services';
+      case 'products': return 'Manage Products';
+      case 'jobs': return 'Service Job Orders';
+      case 'website': return 'Edit Website';
+      case 'inquiries': return 'Customer Inquiries';
+      case 'profile': return 'My Profile';
+      case 'settings': return 'Account Settings';
+      default: return 'Admin Panel';
+    }
+  });
 
   adminInquiries = signal<Inquiry[]>([
     { id: '1', customerName: 'Juan Dela Cruz', email: 'juan@example.com', phone: '09123456789', productName: 'Blucid Mono-Crystalline 550W', message: 'I would like to request a quote for 10 panels for my house in Calamba.', status: 'new', createdAt: '2026-04-20T10:30:00Z' },
@@ -3825,7 +3813,7 @@ export class AdminDashboard implements AfterViewInit, OnInit {
       bannerImage: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?q=80&w=2072&auto=format&fit=crop',
     },
     about: {
-      headerTitle: 'About Blucid',
+      headerTitle: 'About Us',
       headerSubtitle: 'Our story and mission to green energy',
       bannerImage: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=2070&auto=format&fit=crop',
       mission: 'Recognize our customer needs and provide flexibility in sourcing, competitive prices, on-time deliveries and customized solutions for their unique needs. Ensure attentive, effective and proactive customer service and personalized attention to customers. Sustain our reputation as a reliable, professional, customer-oriented, dynamic player in the market. Continually build our skills and knowledge to meet the growing and diverse needs of customers. Continuously improve our business processes leading to prompt and efficient sales and after sales services. Achieve profitable growth, operational and organizational excellence without compromising from our values and business ethics.',
@@ -3841,7 +3829,7 @@ export class AdminDashboard implements AfterViewInit, OnInit {
       email: 'hello@blucid.com',
       phone: '+63 912 345 6789',
       contactMethods: [
-        { label: 'Facebook', value: 'facebook.com/blucid' },
+        { label: 'Facebook', value: 'facebook.com/search/top/?q=blucid%20enterprise%20inc.' },
         { label: 'Instagram', value: '@blucid' }
       ],
       formTitle: 'Project Details',
@@ -4223,6 +4211,9 @@ export class AdminDashboard implements AfterViewInit, OnInit {
   updateInquiryStatus(inquiry: Inquiry, status: 'new' | 'replied') {
     this.adminInquiries.update(list => list.map(i => i.id === inquiry.id ? { ...i, status } : i));
     this.saveInquiries();
+    if (status === 'replied') {
+      this.addSystemNotification('Inquiry Updated', `Marked message from ${inquiry.customerName} as handled.`, 'mark_email_read', 'bg-slate-100 text-slate-400');
+    }
   }
 
   deleteInquiry(inquiry: Inquiry) {
@@ -4254,6 +4245,7 @@ export class AdminDashboard implements AfterViewInit, OnInit {
        localStorage.setItem('blucid_services', JSON.stringify(this.adminServices()));
        localStorage.setItem('blucid_products', JSON.stringify(this.adminProducts()));
     }
+    this.addSystemNotification('Website Published', 'Current website contents and configurations have been published live.', 'publish', 'bg-blue-100 text-blue-600');
     this.showNotification('Website settings successfully saved!');
   }
 
@@ -4707,7 +4699,9 @@ export class AdminDashboard implements AfterViewInit, OnInit {
   }
 
   confirmSaveProduct() {
-    this.showProductPreview.set(true);
+      if (confirm('Are you sure you want to save your product changes?')) {
+          this.showProductPreview.set(true);
+      }
   }
 
   cancelPreviewService() {
@@ -4759,6 +4753,7 @@ export class AdminDashboard implements AfterViewInit, OnInit {
     });
     
     doc.save('Blucid_Project_Records.pdf');
+    this.addSystemNotification('Report Generated', `Exported ${projects.length} project records to PDF.`, 'picture_as_pdf', 'bg-blue-50 text-blue-600');
   }
 
   async downloadServiceJobsPDF() {
@@ -4799,6 +4794,7 @@ export class AdminDashboard implements AfterViewInit, OnInit {
     });
     
     doc.save('Blucid_Service_Records.pdf');
+    this.addSystemNotification('Report Generated', `Exported ${jobs.length} service job records to PDF.`, 'picture_as_pdf', 'bg-indigo-50 text-indigo-600');
   }
 
   saveService() {

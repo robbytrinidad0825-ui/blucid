@@ -1,6 +1,7 @@
 import {Component, signal, OnInit, inject, PLATFORM_ID} from '@angular/core';
 import {isPlatformBrowser} from '@angular/common';
 import {MatIconModule} from '@angular/material/icon';
+import {SeoService} from './seo';
 
 @Component({
   selector: 'app-about',
@@ -14,8 +15,8 @@ import {MatIconModule} from '@angular/material/icon';
       <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-50 z-0"></div>
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 mb-12">
-        <h1 class="text-4xl lg:text-6xl font-display font-black text-secondary mb-6">{{pageData().headerTitle}}</h1>
-        <p class="text-slate-600 max-w-2xl mx-auto">{{pageData().headerSubtitle}}</p>
+        <h1 class="text-4xl lg:text-6xl font-display font-black text-primary mb-6">{{pageData().headerTitle}}</h1>
+        <p class="text-slate-800 max-w-2xl mx-auto">{{pageData().headerSubtitle}}</p>
       </div>
     </section>
 
@@ -33,8 +34,8 @@ import {MatIconModule} from '@angular/material/icon';
             </div>
             
             <div class="mt-20 lg:mt-0">
-              <h4 class="text-primary font-bold uppercase tracking-[0.2em] text-sm mb-4">About Blucid Enterprise Inc.</h4>
-              <h1 class="text-4xl lg:text-6xl font-display font-black text-secondary mb-8 leading-tight" [innerHTML]="highlightText(pageData().storyTitle || 'Pioneering Sustainable Energy in Laguna')"></h1>
+              <h4 class="text-primary font-bold uppercase tracking-[0.2em] text-sm mb-4">About Us</h4>
+              <h1 class="text-4xl lg:text-6xl font-display font-black text-primary mb-8 leading-tight" [innerHTML]="highlightText(pageData().storyTitle || 'Pioneering Sustainable Energy In Laguna')"></h1>
               <div class="text-slate-600 text-lg leading-relaxed mb-8 space-y-4">
                 <p>BLUCID ENTERPRISE INC. (formerly Blucid Enterprise) was established to be a trading & engineering provider for manufacturing, industrial, automotive, medical & other industries on their sourcing needs and aftermarket support.</p>
                 <p>Our experience in power industry, such UPS manufacturing (uninterrupted power supply), and solar PV have been our core foundation to integrate power products and solutions.</p>
@@ -49,7 +50,7 @@ import {MatIconModule} from '@angular/material/icon';
                     </div>
                     <div>
                       <h3 class="text-xl font-bold text-secondary mb-3">Our Vision</h3>
-                      <p class="text-slate-500 text-sm leading-relaxed">{{pageData().vision}}</p>
+                      <p class="text-slate-800 text-sm leading-relaxed">{{pageData().vision}}</p>
                     </div>
                   </div>
                 </div>
@@ -62,7 +63,7 @@ import {MatIconModule} from '@angular/material/icon';
                     </div>
                     <div>
                       <h3 class="text-xl font-bold text-secondary mb-3">Our Mission</h3>
-                      <p class="text-slate-500 text-sm leading-relaxed">{{pageData().mission}}</p>
+                      <p class="text-slate-800 text-sm leading-relaxed">{{pageData().mission}}</p>
                     </div>
                   </div>
                 </div>
@@ -76,8 +77,8 @@ import {MatIconModule} from '@angular/material/icon';
     <section class="py-24 bg-slate-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="text-center mb-16">
-            <h2 class="text-3xl lg:text-5xl font-display font-black text-secondary mb-6">Our Core Values</h2>
-            <p class="text-slate-500 font-medium">Guiding principles behind our solar innovation.</p>
+            <h2 class="text-3xl lg:text-5xl font-display font-black text-primary mb-6">Our Core Values</h2>
+            <p class="text-slate-800 font-medium">Guiding principles behind our solar innovation.</p>
           </div>
           
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -87,7 +88,7 @@ import {MatIconModule} from '@angular/material/icon';
                   <mat-icon class="text-3xl">{{value.icon}}</mat-icon>
                 </div>
                 <h3 class="text-xl font-bold text-secondary mb-3">{{value.title}}</h3>
-                <p class="text-slate-500 text-sm leading-relaxed flex-grow">{{value.desc}}</p>
+                <p class="text-slate-800 text-sm leading-relaxed flex-grow">{{value.desc}}</p>
               </div>
             }
           </div>
@@ -97,9 +98,10 @@ import {MatIconModule} from '@angular/material/icon';
 })
 export class About implements OnInit {
   private platformId = inject(PLATFORM_ID);
+  private seo = inject(SeoService);
 
   pageData = signal({
-    headerTitle: 'About Blucid',
+    headerTitle: 'About Us',
     headerSubtitle: 'Our story and mission to green energy',
     bannerImage: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=2070&auto=format&fit=crop',
     mission: 'Recognize our customer needs and provide flexibility in sourcing, competitive prices, on-time deliveries and customized solutions for their unique needs. Ensure attentive, effective and proactive customer service and personalized attention to customers. Sustain our reputation as a reliable, professional, customer-oriented, dynamic player in the market. Continually build our skills and knowledge to meet the growing and diverse needs of customers. Continuously improve our business processes leading to prompt and efficient sales and after sales services. Achieve profitable growth, operational and organizational excellence without compromising from our values and business ethics.',
@@ -109,6 +111,13 @@ export class About implements OnInit {
   });
 
   ngOnInit() {
+    this.seo.updateTags({
+      title: 'Our Story & Mission',
+      description: 'Learn about Blucid Enterprise Inc., our mission to pioneer sustainable energy in Laguna, and our core values of customer focus and ethical practices.',
+      image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=2070&auto=format&fit=crop',
+      url: 'https://blucidenterprise.com/about'
+    });
+
     if (isPlatformBrowser(this.platformId)) {
       const websiteDraft = localStorage.getItem('blucid_website_draft');
       if (websiteDraft) {
@@ -138,7 +147,7 @@ export class About implements OnInit {
     if (words.length > 0) {
       // Highlight middle or last word for visual flair
       const idx = words.length > 2 ? words.length - 2 : words.length - 1;
-      words[idx] = `<span class="text-primary italic">${words[idx]}</span>`;
+      words[idx] = `<span class="text-primary">${words[idx]}</span>`;
       return words.join(' ');
     }
     return text;

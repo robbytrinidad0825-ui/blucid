@@ -1099,7 +1099,7 @@ interface ServiceJob {
                   (click)="activeWebsiteTab.set($any(tab))" 
                   class="px-6 py-3 font-bold text-sm capitalize rounded-t-xl transition-colors border-b-2 shrink-0"
                   [ngClass]="activeWebsiteTab() === tab ? 'text-primary border-primary bg-primary/5' : 'text-slate-500 border-transparent hover:bg-slate-50 dark:hover:bg-slate-800'">
-                  {{ tab }}
+                  {{ tab === 'home' ? 'Home Page Configuration' : (tab | titlecase) }}
                 </button>
               }
             </div>
@@ -1805,6 +1805,120 @@ interface ServiceJob {
                                  The CTA section is a global component designed to drive conversions. Use strong action verbs for the button and headline.
                                </div>
                              </div>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Proposal & Social Proof (Accordion) -->
+                  <div class="group/section bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 overflow-hidden transition-all duration-300 hover:border-primary/20">
+                    <div class="flex items-center justify-between p-6 cursor-pointer select-none" (click)="activeAccordionSection.set(activeAccordionSection() === 'proof' ? '' : 'proof')" (keydown.enter)="activeAccordionSection.set(activeAccordionSection() === 'proof' ? '' : 'proof')" tabindex="0" role="button">
+                      <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-primary shadow-sm group-hover/section:scale-110 transition-transform duration-500">
+                          <mat-icon>verified</mat-icon>
+                        </div>
+                        <div>
+                          <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Social Proof & Proposals</h4>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Trust Markers & Ratings</p>
+                        </div>
+                      </div>
+                      <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'proof'">expand_more</mat-icon>
+                    </div>
+
+                    @if (activeAccordionSection() === 'proof') {
+                      <div class="px-6 pb-8 animate-in fade-in slide-in-from-top-4 duration-500">
+                        <div class="h-px bg-slate-200 dark:bg-slate-800 mb-8"></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                          <div>
+                            <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Rating Value</div>
+                            <input type="text" [(ngModel)]="websiteData().home.ratingValue" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3.5 text-sm font-black text-secondary shadow-sm">
+                          </div>
+                          <div>
+                            <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Rating Label</div>
+                            <input type="text" [(ngModel)]="websiteData().home.ratingLabel" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3.5 text-sm text-slate-600 shadow-sm">
+                          </div>
+                          <div class="md:col-span-2 space-y-4">
+                            <h5 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-4">Proposal Disclaimer Block</h5>
+                            <input type="text" [(ngModel)]="websiteData().home.proposalTitle" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3.5 text-sm font-black text-secondary shadow-sm" placeholder="Proposal Title">
+                            <textarea [(ngModel)]="websiteData().home.proposalSubtitle" rows="2" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-4 text-sm text-slate-600 resize-none shadow-sm"></textarea>
+                            <input type="text" [(ngModel)]="websiteData().home.proposalButtonText" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3.5 text-sm font-bold text-primary shadow-sm" placeholder="Button Text">
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Typography & Styling (Accordion) -->
+                  <div class="group/section bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 overflow-hidden transition-all duration-300 hover:border-primary/20">
+                    <div class="flex items-center justify-between p-6 cursor-pointer select-none" (click)="activeAccordionSection.set(activeAccordionSection() === 'styles' ? '' : 'styles')" (keydown.enter)="activeAccordionSection.set(activeAccordionSection() === 'styles' ? '' : 'styles')" tabindex="0" role="button">
+                      <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-primary shadow-sm group-hover/section:scale-110 transition-transform duration-500">
+                          <mat-icon>format_paint</mat-icon>
+                        </div>
+                        <div>
+                          <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Typography & Theme</h4>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Fonts, Sizes & Colors</p>
+                        </div>
+                      </div>
+                      <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'styles'">expand_more</mat-icon>
+                    </div>
+
+                    @if (activeAccordionSection() === 'styles') {
+                      <div class="px-6 pb-8 animate-in fade-in slide-in-from-top-4 duration-500">
+                        <div class="h-px bg-slate-200 dark:bg-slate-800 mb-8"></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                          <div>
+                            <h5 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Font Families</h5>
+                            <div class="space-y-4">
+                              <div>
+                                <div class="block text-[9px] font-black text-slate-400 uppercase mb-1 px-1">Sans Serif (UI)</div>
+                                <input type="text" [(ngModel)]="websiteData().typography.fontSans" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm shadow-inner">
+                              </div>
+                              <div>
+                                <div class="block text-[9px] font-black text-slate-400 uppercase mb-1 px-1">Display (Heads)</div>
+                                <input type="text" [(ngModel)]="websiteData().typography.fontDisplay" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm shadow-inner">
+                              </div>
+                            </div>
+                            
+                            <h5 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-6 mb-4">Header Sizes (Tailwind Scale)</h5>
+                            <div class="grid grid-cols-2 gap-4">
+                              <div>
+                                <div class="block text-[9px] font-black text-slate-400 uppercase mb-1 px-1">H1 Size</div>
+                                <input type="text" [(ngModel)]="websiteData().typography.h1Size" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm shadow-inner" placeholder="e.g. 5xl">
+                              </div>
+                              <div>
+                                <div class="block text-[9px] font-black text-slate-400 uppercase mb-1 px-1">H2 Size</div>
+                                <input type="text" [(ngModel)]="websiteData().typography.h2Size" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm shadow-inner" placeholder="e.g. 3xl">
+                              </div>
+                              <div>
+                                <div class="block text-[9px] font-black text-slate-400 uppercase mb-1 px-1">H3 Size</div>
+                                <input type="text" [(ngModel)]="websiteData().typography.h3Size" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm shadow-inner" placeholder="e.g. 2xl">
+                              </div>
+                              <div>
+                                <div class="block text-[9px] font-black text-slate-400 uppercase mb-1 px-1">H4 Size</div>
+                                <input type="text" [(ngModel)]="websiteData().typography.h4Size" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm shadow-inner" placeholder="e.g. xl">
+                              </div>
+                            </div>
+                          </div>
+                          <div>
+                            <h5 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Primary Theme Colors</h5>
+                            <div class="grid grid-cols-1 gap-4">
+                              <div class="flex items-center gap-4">
+                                <input type="color" [(ngModel)]="websiteData().theme.primary" class="w-12 h-12 rounded-xl cursor-pointer border-none bg-transparent">
+                                <div class="flex-grow">
+                                  <div class="block text-[9px] font-black text-slate-400 uppercase mb-1 px-1">Primary Color</div>
+                                  <input type="text" [(ngModel)]="websiteData().theme.primary" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm font-mono shadow-sm">
+                                </div>
+                              </div>
+                              <div class="flex items-center gap-4">
+                                <input type="color" [(ngModel)]="websiteData().theme.secondary" class="w-12 h-12 rounded-xl cursor-pointer border-none bg-transparent">
+                                <div class="flex-grow">
+                                  <div class="block text-[9px] font-black text-slate-400 uppercase mb-1 px-1">Secondary Color</div>
+                                  <input type="text" [(ngModel)]="websiteData().theme.secondary" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm font-mono shadow-sm">
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -3658,6 +3772,14 @@ export class AdminDashboard implements AfterViewInit, OnInit {
       projectsSubtitle: 'Explore some of our recent installations and see how we are empowering the community with clean energy.',
       projects: PORTFOLIO_PROJECTS,
       portfolioDisplayFormat: 'grid', // 'grid' or 'carousel'
+      proposalTitle: 'Get a Detailed Proposal',
+      proposalSubtitle: 'Every roof is unique. Our engineers provide a free site visit and 3D shading analysis for precise accuracy.',
+      proposalButtonText: 'Send My Details',
+      ratingValue: '4.9/5',
+      ratingLabel: 'Average Rating',
+      projectOverviewTitle: 'Project Overview',
+      galleryTitle: 'Gallery',
+      gallerySubtitle: 'A Closer Look',
       videoTitle: 'Experience the Power of the Sun',
       videoDescription: 'Watch how Blucid Enterprise transforms homes and businesses with sustainable energy. Our integrated solar solutions provide reliable, cost-effective power while reducing your carbon footprint.',
       videoStats: [
@@ -3856,6 +3978,21 @@ export class AdminDashboard implements AfterViewInit, OnInit {
         schedule: 'Mon - Fri: 8:00 AM - 5:00 PM',
         copyright: '© 2026 Blucid Enterprise Inc. All rights reserved.',
         bannerImage: ''
+      },
+      typography: {
+        fontSans: 'Inter',
+        fontDisplay: 'Outfit',
+        fontMono: 'JetBrains Mono',
+        h1Size: '4xl',
+        h2Size: '3xl',
+        h3Size: '2xl',
+        h4Size: 'xl',
+        baseSize: 'sm'
+      },
+      theme: {
+        primary: '#0ea5e9',
+        secondary: '#0f172a',
+        accent: '#10b981'
       }
     });
 
@@ -4282,7 +4419,9 @@ export class AdminDashboard implements AfterViewInit, OnInit {
                  portfolioTitle: parsed.home?.portfolioTitle || current.home.portfolioTitle,
                  projectsTitle: parsed.home?.projectsTitle || current.home.projectsTitle,
                  projectsSubtitle: parsed.home?.projectsSubtitle || current.home.projectsSubtitle
-             }
+             },
+             typography: parsed.typography || current.typography,
+             theme: parsed.theme || current.theme
            }));
          } catch { /* ignore */ }
       }

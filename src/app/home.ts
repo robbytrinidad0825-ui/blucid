@@ -1,4 +1,4 @@
-import {Component, signal, OnInit, OnDestroy, PLATFORM_ID, inject, computed} from '@angular/core';
+import {Component, signal, OnInit, OnDestroy, PLATFORM_ID, inject, computed, HostListener} from '@angular/core';
 import {isPlatformBrowser, DecimalPipe} from '@angular/common';
 import {MatIconModule} from '@angular/material/icon';
 import {RouterLink} from '@angular/router';
@@ -478,12 +478,12 @@ import {SeoService} from './seo';
               <mat-icon>verified</mat-icon>
             </div>
             <div>
-              <h4 class="text-lg font-display font-bold text-secondary">Get a Detailed Proposal</h4>
-              <p class="text-sm text-slate-800">Every roof is unique. Our engineers provide a free site visit and 3D shading analysis for precise accuracy.</p>
+              <h4 class="text-lg font-display font-bold text-secondary">{{homeData().proposalTitle}}</h4>
+              <p class="text-sm text-slate-800">{{homeData().proposalSubtitle}}</p>
             </div>
           </div>
           <a routerLink="/contact" class="inline-flex items-center justify-center px-10 py-5 rounded-full bg-secondary text-white font-bold hover:bg-slate-800 transition-all shadow-xl shadow-slate-200">
-            Send My Details
+            {{homeData().proposalButtonText}}
             <mat-icon class="ml-2">arrow_forward</mat-icon>
           </a>
         </div>
@@ -524,8 +524,8 @@ import {SeoService} from './seo';
           </div>
           <div class="flex gap-4">
             <div class="text-right">
-              <p class="text-2xl font-display font-black text-secondary">4.9/5</p>
-              <p class="text-xs text-slate-800 uppercase font-bold tracking-widest">Average Rating</p>
+              <p class="text-2xl font-display font-black text-secondary">{{homeData().ratingValue}}</p>
+              <p class="text-xs text-slate-800 uppercase font-bold tracking-widest">{{homeData().ratingLabel}}</p>
             </div>
             <div class="flex text-amber-400">
               <mat-icon>star</mat-icon>
@@ -630,15 +630,15 @@ import {SeoService} from './seo';
                   </div>
 
                   <div class="max-w-3xl mx-auto text-center mb-16">
-                    <h3 class="text-2xl font-display font-black text-secondary mb-4">Project Overview</h3>
+                    <h3 class="text-2xl font-display font-black text-secondary mb-4">{{homeData().projectOverviewTitle}}</h3>
                     <p class="text-lg text-slate-800 leading-relaxed">{{selectedProject()?.description}}</p>
                   </div>
 
                   <div class="pb-8">
                      <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
                         <div>
-                           <h4 class="text-primary font-bold uppercase tracking-widest text-[10px] mb-1">Gallery</h4>
-                           <h3 class="text-2xl font-display font-black text-secondary">A Closer Look</h3>
+                           <h4 class="text-primary font-bold uppercase tracking-widest text-[10px] mb-1">{{homeData().galleryTitle}}</h4>
+                           <h3 class="text-2xl font-display font-black text-secondary">{{homeData().gallerySubtitle}}</h3>
                         </div>
                         <div class="text-slate-500 font-medium">
                            Showing {{selectedProject()?.gallery?.length}} photos
@@ -726,6 +726,14 @@ export class Home implements OnInit, OnDestroy {
     projectsSubtitle: 'Explore some of our recent installations and see how we are empowering the community with clean energy.',
     projects: PORTFOLIO_PROJECTS,
     portfolioDisplayFormat: 'grid',
+    proposalTitle: 'Get a Detailed Proposal',
+    proposalSubtitle: 'Every roof is unique. Our engineers provide a free site visit and 3D shading analysis for precise accuracy.',
+    proposalButtonText: 'Send My Details',
+    ratingValue: '4.9/5',
+    ratingLabel: 'Average Rating',
+    projectOverviewTitle: 'Project Overview',
+    galleryTitle: 'Gallery',
+    gallerySubtitle: 'A Closer Look',
     videoTitle: 'Experience the Power of the Sun',
     videoDescription: 'Watch how Blucid Enterprise transforms homes and businesses with sustainable energy. Our integrated solar solutions provide reliable, cost-effective power while reducing your carbon footprint. Join the green revolution today and secure your energy future.',
     videoStats: [
@@ -829,6 +837,32 @@ export class Home implements OnInit, OnDestroy {
       trees: Math.floor(treesEquivalent)
     };
   });
+
+  private loadFromStorage() {
+    if (isPlatformBrowser(this.platformId)) {
+      const savedData = localStorage.getItem('blucid_website_content');
+      if (savedData) {
+          try {
+              const parsed = JSON.parse(savedData);
+              if (parsed.home) {
+                  this.homeData.update(current => ({
+                      ...current,
+                      ...parsed.home
+                  }));
+              }
+          } catch (e) {
+              console.error('Failed to load website content from storage', e);
+          }
+      }
+    }
+  }
+
+  @HostListener('window:storage', ['$event'])
+  onStorageChange(event: StorageEvent) {
+    if (isPlatformBrowser(this.platformId) && event.key === 'blucid_website_content') {
+        this.loadFromStorage();
+    }
+  }
 
   ngOnInit() {
     this.seo.updateTags({

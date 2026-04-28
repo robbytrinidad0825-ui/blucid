@@ -2,15 +2,22 @@
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 @import "tailwindcss";
 
+:root {
+  --primary-color: #224064;
+  --secondary-color: #0f172a;
+  --font-sans-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display-family: "Outfit", sans-serif;
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Outfit", sans-serif;
+  --font-sans: var(--font-sans-family);
+  --font-display: var(--font-display-family);
 
-  --color-primary: #224064;
-  --color-primary-dark: #1a324e;
-  --color-secondary: var(--color-slate-900);
+  --color-primary: var(--primary-color);
+  --color-primary-dark: var(--primary-color);
+  --color-secondary: var(--secondary-color);
   --color-accent: var(--color-amber-400);
 
   @keyframes marquee {
@@ -45,7 +52,7 @@
     letter-spacing: -0.02em;
     line-height: 1.1;
     color: var(--color-slate-900);
-    @apply text-4xl md:text-6xl lg:text-7xl;
+    font-size: var(--h1-size, 3.75rem);
   }
 
   .dark h1 {
@@ -55,6 +62,11 @@
   h2, h3, h4, h5, h6 {
     @apply font-display font-bold tracking-tight;
   }
+
+  h2 { font-size: var(--h2-size, 3rem); }
+  h3 { font-size: var(--h3-size, 2.25rem); }
+  h4 { font-size: var(--h4-size, 1.5rem); }
+  p, span, div { font-size: var(--base-size, inherit); }
 }
 
 @utility heading-1 {

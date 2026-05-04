@@ -13,9 +13,7 @@ import {MatIconModule} from '@angular/material/icon';
       <div class="max-w-md w-full">
         <!-- Brand -->
         <div class="text-center mb-10">
-          <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary text-white shadow-xl mb-4">
-            <mat-icon class="text-3xl">admin_panel_settings</mat-icon>
-          </div>
+          <img src="/img/nlogo.png" alt="Blucid Enterprise Logo" class="w-auto h-16 mx-auto mb-4 object-contain">
           <h1 class="text-3xl font-display font-black text-secondary">Admin Portal</h1>
           <p class="text-slate-800 mt-2">Blucid Enterprise Inc. Management</p>
         </div>

@@ -4,62 +4,30 @@ import {MatIconModule} from '@angular/material/icon';
 import {FormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
 import {SeoService} from './seo';
+import {WebsiteDataService} from './website-data';
 
 @Component({
   selector: 'app-products',
   imports: [MatIconModule, FormsModule, RouterLink],
   template: `
-    <section class="pt-20 pb-12 bg-slate-50 relative overflow-hidden">
-      <!-- Banner Image -->
+    <!-- Hero Section -->
+    <section class="pt-24 md:pt-32 pb-16 md:pb-24 bg-slate-50 relative overflow-hidden">
       <div class="absolute inset-0 z-0 opacity-20">
-        <img [src]="pageData().bannerImage" alt="" class="w-full h-full object-cover">
+        @if (headerData().bannerImage) {
+          <img [src]="headerData().bannerImage" alt="Products Banner" class="w-full h-full object-cover" referrerpolicy="no-referrer">
+        } @else {
+          <div class="w-full h-full bg-slate-200"></div>
+        }
       </div>
       <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-50 z-0"></div>
-
+      
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-        <h1 class="text-4xl lg:text-6xl font-display font-black text-primary mb-6">{{pageData().headerTitle}}</h1>
-        <p class="text-slate-800 max-w-2xl mx-auto">{{pageData().headerSubtitle}}</p>
-      </div>
-    </section>
-
-    <section class="py-12 bg-white border-b border-slate-100 overflow-hidden">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-        <h2 class="text-center text-xs font-bold uppercase tracking-[0.3em] text-slate-400">Trusted by Industry Leaders</h2>
-      </div>
-      <div class="relative flex overflow-x-hidden">
-        <div class="animate-marquee flex whitespace-nowrap items-center gap-16 py-4">
-          @for (logo of brandLogos; track logo.name) {
-            <div class="flex items-center justify-center grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-500 min-w-[120px]">
-              @if (logo.img) {
-                <img [src]="logo.img" [alt]="logo.name" class="h-16 w-auto object-contain">
-              } @else {
-                <div class="flex items-center gap-4">
-                  <div class="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center p-2">
-                    <mat-icon class="text-3xl text-slate-400">{{logo.icon}}</mat-icon>
-                  </div>
-                  <span class="text-xl font-display font-black text-slate-300 tracking-tighter">{{logo.name}}</span>
-                </div>
-              }
-            </div>
-          }
-        </div>
-        <!-- Duplicate for seamless loop -->
-        <div class="absolute top-0 animate-marquee2 flex whitespace-nowrap items-center gap-16 py-4">
-          @for (logo of brandLogos; track logo.name + '-dup') {
-            <div class="flex items-center justify-center grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-500 min-w-[120px]">
-              @if (logo.img) {
-                <img [src]="logo.img" [alt]="logo.name" class="h-16 w-auto object-contain">
-              } @else {
-                <div class="flex items-center gap-4">
-                  <div class="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center p-2">
-                    <mat-icon class="text-3xl text-slate-400">{{logo.icon}}</mat-icon>
-                  </div>
-                  <span class="text-xl font-display font-black text-slate-300 tracking-tighter">{{logo.name}}</span>
-                </div>
-              }
-            </div>
-          }
-        </div>
+        <h1 class="text-primary mb-6 leading-tight" style="font-size: clamp(28px, 5vw, 40px); font-family: Arial; font-weight: bold;">
+          {{headerData().headerTitle}}
+        </h1>
+        <p class="max-w-2xl mx-auto px-4" style="font-size: clamp(16px, 3vw, 18px); color: #000000;">
+          {{headerData().headerSubtitle}}
+        </p>
       </div>
     </section>
 
@@ -200,12 +168,9 @@ import {SeoService} from './seo';
 export class Products implements OnInit {
   private platformId = inject(PLATFORM_ID);
   private seo = inject(SeoService);
+  private websiteService = inject(WebsiteDataService);
 
-  pageData = signal({
-    headerTitle: 'Our Products',
-    headerSubtitle: 'High-performance solar hardware and electrical components for every installation.',
-    bannerImage: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?q=80&w=2072&auto=format&fit=crop',
-  });
+  headerData = computed(() => this.websiteService.data().products);
 
   activeCategory = signal('All');
   categories = computed(() => {
@@ -372,31 +337,11 @@ export class Products implements OnInit {
     this.seo.updateTags({
       title: 'Solar Panel Shop & Electrical Components',
       description: 'Browse our selection of high-efficiency solar panels, industrial power systems, smart distribution panels, and more. Quality electrical and solar products in Laguna.',
-      image: 'https://images.unsplash.com/photo-1509391366360-fe5bb65830bb?q=80&w=2070&auto=format&fit=crop',
-      url: 'https://blucidenterprise.com/products'
+      image: this.headerData().bannerImage || 'https://images.unsplash.com/photo-1509391366360-fe5bb65830bb?q=80&w=2070&auto=format&fit=crop',
+      url: 'https://blucidinc.com/products'
     });
 
     if (isPlatformBrowser(this.platformId)) {
-      const websiteDraft = localStorage.getItem('blucid_website_draft');
-      if (websiteDraft) {
-        try {
-          const parsed = JSON.parse(websiteDraft);
-          if (parsed && parsed.products) {
-            this.pageData.set(parsed.products);
-          }
-        } catch { /* ignore */ }
-      } else {
-        const websiteContent = localStorage.getItem('blucid_website_content');
-        if (websiteContent) {
-          try {
-            const parsed = JSON.parse(websiteContent);
-            if (parsed && parsed.products) {
-              this.pageData.set(parsed.products);
-            }
-          } catch { /* ignore */ }
-        }
-      }
-
       const productsStr = localStorage.getItem('blucid_products');
       if (productsStr) {
         try {

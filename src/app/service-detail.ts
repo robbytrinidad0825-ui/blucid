@@ -46,7 +46,7 @@ interface ServiceInfo {
               <div class="w-16 h-16 rounded-2xl bg-blue-100 text-primary flex items-center justify-center mb-6">
                 <mat-icon class="text-3xl">{{service.icon}}</mat-icon>
               </div>
-              <h1 class="text-4xl lg:text-6xl font-display font-black text-secondary mb-6">{{service.title}}</h1>
+              <h1 class="text-secondary mb-6" style="font-family: Arial; font-size: 40px; font-weight: bold; text-align: left;">{{service.title}}</h1>
               <p class="text-lg text-slate-800 leading-relaxed mb-8">{{service.longDescription}}</p>
               
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
@@ -61,7 +61,7 @@ interface ServiceInfo {
             </div>
             <div class="relative">
               <div class="absolute -inset-4 bg-primary/10 blur-3xl rounded-full"></div>
-              <img [src]="service.image" [alt]="service.title" class="relative rounded-[3rem] shadow-2xl w-full object-cover aspect-[4/5]" referrerpolicy="no-referrer">
+              <img [src]="service.image" [alt]="service.title" class="relative rounded-[3rem] shadow-2xl w-full object-cover" style="height: 400px;" referrerpolicy="no-referrer">
             </div>
           </div>
         </div>
@@ -71,7 +71,7 @@ interface ServiceInfo {
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="lg:grid lg:grid-cols-2 lg:gap-20">
             <div>
-              <h2 class="text-3xl font-display font-black text-secondary mb-12">Our Step-by-Step Process</h2>
+              <h2 class="text-secondary mb-12" style="font-family: Arial; font-weight: bold; font-size: 30px;">Our Step-by-Step Process</h2>
               <div class="space-y-0">
                 @for (step of service.process; track step.title; let i = $index; let last = $last) {
                   <div class="flex gap-8 group">
@@ -93,7 +93,7 @@ interface ServiceInfo {
             </div>
 
             <div class="mt-20 lg:mt-0">
-              <h2 class="text-3xl font-display font-black text-secondary mb-8">Service FAQs</h2>
+              <h2 class="text-secondary mb-8" style="font-family: Arial; font-weight: bold; font-size: 30px;">Service FAQs</h2>
               <div class="space-y-4">
                 @for (faq of service.faqs; track faq.q; let i = $index) {
                   <div class="border border-slate-100 rounded-2xl overflow-hidden transition-all" [ngClass]="{'shadow-lg shadow-slate-100 border-primary/20': openFaqIndex() === i}">
@@ -101,7 +101,7 @@ interface ServiceInfo {
                       (click)="toggleFaq(i)"
                       class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-slate-50 transition-colors"
                     >
-                      <span class="font-bold text-secondary text-sm">{{faq.q}}</span>
+                      <span class="font-bold text-secondary" style="font-size: 20px;">{{faq.q}}</span>
                       <mat-icon class="text-primary transition-transform duration-300" [style.transform]="openFaqIndex() === i ? 'rotate(180deg)' : 'rotate(0)'">
                         expand_more
                       </mat-icon>
@@ -124,21 +124,7 @@ interface ServiceInfo {
         </div>
       </section>
 
-      <section class="py-20 bg-secondary text-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 class="text-3xl lg:text-5xl font-display font-black mb-8">Ready to get started?</h2>
-          <p class="text-slate-800 text-lg mb-10 max-w-2xl mx-auto">Contact our experts today for a detailed consultation and customized quote for {{service.title}}.</p>
-          <a [routerLink]="['/contact']" [queryParams]="{interest: service.title}" class="inline-flex items-center justify-center px-10 py-5 rounded-full bg-primary text-white font-bold hover:bg-primary-dark transition-all">
-            Request a Quote
-            <mat-icon class="ml-2">arrow_forward</mat-icon>
-          </a>
-        </div>
-      </section>
-    } @else {
-      <div class="py-40 text-center">
-        <h1 class="text-2xl font-bold text-secondary">Service not found</h1>
-        <a routerLink="/services" class="text-primary font-bold hover:underline mt-4 inline-block">Return to Services</a>
-      </div>
+  
     }
   `
 })

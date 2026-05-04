@@ -2,22 +2,30 @@
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 @import "tailwindcss";
 
-:root {
-  --primary-color: #224064;
-  --secondary-color: #0f172a;
-  --font-sans-family: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display-family: "Outfit", sans-serif;
-}
-
 @custom-variant dark (&:where(.dark, .dark *));
 
-@theme {
-  --font-sans: var(--font-sans-family);
-  --font-display: var(--font-display-family);
+:root {
+  --sys-h1-font: "Arial", sans-serif;
+  --sys-h2-font: "Arial", sans-serif;
+  --sys-h3-font: "Arial", sans-serif;
+  --sys-h4-font: "Arial", sans-serif;
+  --sys-body-font: "Arial", sans-serif;
+  --sys-base-font-size: 16px;
 
-  --color-primary: var(--primary-color);
-  --color-primary-dark: var(--primary-color);
-  --color-secondary: var(--secondary-color);
+  --sys-body-bg: #ffffff;
+  --sys-button-bg: #00adef;
+  --sys-footer-bg: #0f172a;
+  --sys-header-bg: #ffffff;
+  --sys-navbar-bg: #ffffff;
+}
+
+@theme {
+  --font-sans: "Arial", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Arial", sans-serif;
+
+  --color-primary: #224064;
+  --color-primary-dark: #1a324e;
+  --color-secondary: var(--color-slate-900);
   --color-accent: var(--color-amber-400);
 
   @keyframes marquee {
@@ -35,44 +43,62 @@
 
 @layer base {
   body {
-    @apply font-sans;
-    background-color: var(--color-white);
+    font-family: var(--sys-body-font);
+    font-size: var(--sys-base-font-size);
+    background-color: var(--sys-body-bg);
     color: var(--color-slate-900);
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   .dark body {
-    background-color: var(--color-slate-900);
+    background-color: var(--sys-body-bg);
     color: var(--color-slate-100);
   }
 
   h1 {
-    font-family: var(--font-display);
+    font-family: var(--sys-h1-font);
     font-weight: 700;
     letter-spacing: -0.02em;
     line-height: 1.1;
     color: var(--color-slate-900);
-    font-size: var(--h1-size, 3.75rem);
+    @apply text-4xl md:text-6xl lg:text-7xl;
+  }
+
+  /* Specific styles from focus mode */
+  app-home section:first-of-type h1 {
+    font-size: 42px !important;
+    font-family: var(--sys-h1-font) !important;
+    font-weight: bold !important;
   }
 
   .dark h1 {
     color: var(--color-white);
   }
 
-  h2, h3, h4, h5, h6 {
-    @apply font-display font-bold tracking-tight;
+  h2 {
+    font-family: var(--sys-h2-font);
+    @apply font-bold tracking-normal leading-tight;
   }
-
-  h2 { font-size: var(--h2-size, 3rem); }
-  h3 { font-size: var(--h3-size, 2.25rem); }
-  h4 { font-size: var(--h4-size, 1.5rem); }
-  p, span, div { font-size: var(--base-size, inherit); }
+  
+  h3 {
+    font-family: var(--sys-h3-font);
+    @apply font-bold tracking-normal leading-tight;
+  }
+  
+  h4 {
+    font-family: var(--sys-h4-font);
+    @apply font-bold tracking-normal leading-tight;
+  }
+  
+  h5, h6 {
+    @apply font-display font-bold tracking-normal leading-tight;
+  }
 }
 
 @utility heading-1 {
-  font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-family: var(--sys-h1-font);
+  font-weight: 800;
+  letter-spacing: -0.01em;
   line-height: 1.1;
   color: var(--color-slate-900);
   @apply text-4xl md:text-6xl lg:text-7xl;
@@ -123,7 +149,9 @@
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
-.hide-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+
+/* --- Responsive Utilities --- */
+.container-px {
+  @apply px-4 sm:px-6 lg:px-8;
 }
+

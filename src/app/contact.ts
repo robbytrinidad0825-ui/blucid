@@ -20,8 +20,8 @@ interface ProductItem { id: string; name: string; }
       <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-50 z-0"></div>
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-        <h1 class="text-4xl lg:text-6xl font-display font-black text-secondary mb-6">{{pageData().headerTitle}}</h1>
-        <p class="text-slate-800 max-w-2xl mx-auto">{{pageData().headerSubtitle}}</p>
+        <h1 class="mb-6 font-display" style="color: #224064; font-size: 40px; font-family: Arial; font-weight: bold;">{{pageData().headerTitle}}</h1>
+        <p class="max-w-2xl mx-auto" style="color: #000000; font-size: 18px; font-family: Arial;">{{pageData().headerSubtitle}}</p>
       </div>
     </section>
 
@@ -32,10 +32,10 @@ interface ProductItem { id: string; name: string; }
           <div class="relative">
             <div class="absolute -top-10 -left-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl -z-10"></div>
             
-            <h2 class="text-3xl lg:text-4xl font-display font-black text-secondary mb-3 tracking-tight">
+            <h2 class="mb-3 tracking-tight" style="color: #224064; font-family: Arial; font-weight: bold; font-size: 32px;">
               {{ pageData().formTitle || 'Project Details' }}
             </h2>
-            <p class="text-slate-800 mb-10 text-lg leading-relaxed">Fill out the form below and our specialists will provide a custom energy solution tailored to your site.</p>
+            <p class="mb-10 text-lg leading-relaxed" style="color: #000000;">Fill out the form below and our specialists will provide a custom energy solution tailored to your site.</p>
             
             @if (submitted) {
               <div class="p-10 rounded-[2.5rem] bg-emerald-50 border border-emerald-100/50 text-center animate-in fade-in zoom-in-95 duration-700 shadow-2xl shadow-emerald-500/10">
@@ -56,7 +56,7 @@ interface ProductItem { id: string; name: string; }
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-7">
                     <!-- Name Input -->
                     <div class="space-y-1.5">
-                      <label for="name" class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      <label for="name" class="flex items-center gap-2 text-[10px] uppercase tracking-widest ml-1" style="color: #000000; font-family: Arial; font-weight: bold;">
                         <mat-icon class="!w-3 !h-3 !text-[12px]">person</mat-icon> Full Name
                       </label>
                       <div class="relative group">
@@ -77,7 +77,7 @@ interface ProductItem { id: string; name: string; }
 
                     <!-- Email Input -->
                     <div class="space-y-1.5">
-                      <label for="email" class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      <label for="email" class="flex items-center gap-2 text-[10px] uppercase tracking-widest ml-1" style="color: #000000; font-weight: bold; font-family: Arial;">
                         <mat-icon class="!w-3 !h-3 !text-[12px]">alternate_email</mat-icon> Email Address
                       </label>
                       <div class="relative group">
@@ -100,7 +100,7 @@ interface ProductItem { id: string; name: string; }
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-7">
                     <!-- Phone Input -->
                     <div class="space-y-1.5">
-                      <label for="phone" class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      <label for="phone" class="flex items-center gap-2 text-[10px] uppercase tracking-widest ml-1" style="color: #000000; font-weight: bold; font-family: Arial;">
                         <mat-icon class="!w-3 !h-3 !text-[12px]">call</mat-icon> Mobile Number
                       </label>
                       <div class="relative group">
@@ -116,7 +116,7 @@ interface ProductItem { id: string; name: string; }
 
                     <!-- Location Input -->
                     <div class="space-y-1.5">
-                      <label for="location" class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      <label for="location" class="flex items-center gap-2 text-[10px] uppercase tracking-widest ml-1" style="color: #000000; font-family: Arial; font-weight: bold;">
                         <mat-icon class="!w-3 !h-3 !text-[12px]">near_me</mat-icon> Site Location
                       </label>
                       <div class="relative group">
@@ -132,7 +132,7 @@ interface ProductItem { id: string; name: string; }
                   </div>
 
                   <div class="space-y-1.5">
-                    <label for="interest" class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    <label for="interest" class="flex items-center gap-2 text-[10px] uppercase tracking-widest ml-1" style="color: #000000; font-family: Arial; font-weight: bold;">
                       <mat-icon class="!w-3 !h-3 !text-[12px]">bolt</mat-icon> Project Category
                     </label>
                     <select id="interest" formControlName="interest" 
@@ -153,7 +153,7 @@ interface ProductItem { id: string; name: string; }
 
                   <!-- Message Area -->
                   <div class="space-y-1.5">
-                    <label for="message" class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    <label for="message" class="flex items-center gap-2 text-[10px] uppercase tracking-widest ml-1" style="font-family: Arial; font-weight: bold; color: #000000;">
                       <mat-icon class="!w-3 !h-3 !text-[12px]">description</mat-icon> Detailed Requirements
                     </label>
                     <textarea id="message" formControlName="message" rows="5" 
@@ -173,18 +173,18 @@ interface ProductItem { id: string; name: string; }
                       Submit Quote Parameters <mat-icon>arrow_forward</mat-icon>
                     </span>
                   </button>
-                  <p class="text-center text-[10px] text-slate-800 uppercase tracking-widest font-black">Secure transmission enabled</p>
+                  <p class="text-center text-[10px] uppercase tracking-widest" style="font-weight: bold; font-family: Arial; color: #000000;">Secure transmission enabled</p>
                 </form>
               </div>
             }
           </div>
 
           <!-- Info Side -->
-          <div class="lg:pt-10">
-            <h2 class="text-3xl lg:text-4xl font-display font-black text-secondary mb-3 tracking-tight">
+          <div class="lg:pt-10" style="padding-top: 0px;">
+            <h2 class="mb-3 tracking-tight" style="color: #224064; font-family: Arial; font-size: 32px; font-weight: bold;">
               {{ pageData().officeTitle || 'Our Office' }}
             </h2>
-            <p class="text-slate-800 mb-12 text-lg leading-relaxed">Visit our technical center or connect via high-priority communication channels.</p>
+            <p class="mb-12 text-lg leading-relaxed" style="color: #000000;">Visit our technical center or connect via high-priority communication channels.</p>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6 mb-12">
               <div class="group flex gap-6 p-6 rounded-3xl bg-slate-50/50 border border-slate-100 transition-all hover:bg-white hover:shadow-xl hover:shadow-slate-200/40">
@@ -193,7 +193,7 @@ interface ProductItem { id: string; name: string; }
                 </div>
                 <div>
                   <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">HQ Address</h4>
-                  <p class="text-secondary font-bold leading-relaxed">{{pageData().address}}</p>
+                  <p class="leading-relaxed" style="font-family: Arial; font-weight: bold;">{{pageData().address}}</p>
                 </div>
               </div>
               
@@ -203,7 +203,7 @@ interface ProductItem { id: string; name: string; }
                 </div>
                 <div>
                   <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Direct Line</h4>
-                  <p class="text-secondary font-bold leading-relaxed">{{pageData().phone}}</p>
+                  <p class="leading-relaxed" style="font-weight: bold; font-family: Arial;">{{pageData().phone}}</p>
                 </div>
               </div>
               
@@ -213,7 +213,7 @@ interface ProductItem { id: string; name: string; }
                 </div>
                 <div>
                   <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Email Protocol</h4>
-                  <p class="text-secondary font-bold leading-relaxed underline decoration-primary/30 underline-offset-4">{{pageData().email}}</p>
+                  <p class="leading-relaxed underline decoration-primary/30 underline-offset-4" style="font-weight: bold; font-family: Arial;">{{pageData().email}}</p>
                 </div>
               </div>
               
@@ -223,7 +223,7 @@ interface ProductItem { id: string; name: string; }
                 </div>
                 <div>
                   <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Operations</h4>
-                  <p class="text-secondary font-bold leading-relaxed">{{ pageData().workingHours || 'MON to FRI at 8:00 AM - 5:00 PM' }}</p>
+                  <p class="leading-relaxed" style="font-weight: bold; font-family: Arial;">{{ pageData().workingHours || 'MON to FRI at 8:00 AM - 5:00 PM' }}</p>
                 </div>
               </div>
             </div>
@@ -254,9 +254,9 @@ export class Contact implements OnInit {
     headerTitle: 'Get In Touch',
     headerSubtitle: 'We would love to hear from you',
     bannerImage: 'https://images.unsplash.com/photo-1516387938699-a93567ec168e?q=80&w=2071&auto=format&fit=crop',
-    address: '123 Solar Street, Calamba, Laguna',
+    address: 'B1 L12, Cuervo II Rd, Real, Calamba, 4027 Laguna',
     email: 'info@blucidinc.com',
-    phone: '+63 912 345 6789',
+    phone: '+(049) 520 5780',
     formTitle: 'Project Details',
     officeTitle: 'Our Office',
     workingHours: 'MON to FRI at 8:00 AM - 5:00 PM'

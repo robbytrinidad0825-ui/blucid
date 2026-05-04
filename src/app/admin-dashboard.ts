@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, inject, AfterViewInit, OnInit, ElementRef, ViewChildren, QueryList, PLATFORM_ID, signal, computed} from '@angular/core';
-import {isPlatformBrowser, NgClass, SlicePipe, DatePipe, TitleCasePipe, DecimalPipe} from '@angular/common';
+import {isPlatformBrowser, NgClass, SlicePipe, DatePipe, TitleCasePipe} from '@angular/common';
 import {Router} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {MatIconModule} from '@angular/material/icon';
@@ -9,7 +9,9 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatBadgeModule} from '@angular/material/badge';
 import {CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag, CdkDragHandle} from '@angular/cdk/drag-drop';
 import {animate, stagger} from 'motion';
-import {PORTFOLIO_PROJECTS} from './portfolio-data';
+import { PORTFOLIO_PROJECTS } from './portfolio-data';
+import { WebsiteDataService } from './website-data';
+import { uploadToSupabase, saveWebsiteConfig } from './services/supabase';
 
 interface Inquiry {
   id: string;
@@ -50,38 +52,35 @@ interface ServiceJob {
 @Component({
   selector: 'app-admin-dashboard',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatIconModule, MatRippleModule, MatMenuModule, MatButtonModule, MatBadgeModule, NgClass, SlicePipe, DatePipe, TitleCasePipe, DecimalPipe, FormsModule, CdkDropList, CdkDrag, CdkDragHandle],
+  imports: [MatIconModule, MatRippleModule, MatMenuModule, MatButtonModule, MatBadgeModule, NgClass, SlicePipe, DatePipe, TitleCasePipe, FormsModule, CdkDropList, CdkDrag, CdkDragHandle],
   template: `
     <div class="min-h-screen bg-[#F8FAFC] lg:flex font-sans text-slate-900 pb-20 lg:pb-0">
       <!-- Sidebar -->
-      <aside class="hidden lg:flex flex-col w-72 bg-secondary text-white border-r border-slate-800 relative z-20 shadow-2xl overflow-hidden">
+      <aside class="hidden lg:flex flex-col w-[220px] bg-secondary text-white border-r border-slate-800 relative z-20 shadow-2xl overflow-hidden">
         <div class="p-8">
-          <div class="flex items-center gap-3 mb-10 cursor-pointer group" (click)="activeSection.set('dashboard')" (keydown.enter)="activeSection.set('dashboard')" tabindex="0" role="button" matRipple>
-            <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30 group-hover:scale-110 transition-transform">
-              <mat-icon>bolt</mat-icon>
-            </div>
-            <span class="text-xl font-display font-black tracking-tight">Blucid <span class="text-primary">Admin</span></span>
+          <div class="flex justify-center items-center mb-10 cursor-pointer group" (click)="activeSection.set('dashboard')" (keydown.enter)="activeSection.set('dashboard')" tabindex="0" role="button" matRipple>
+            <img src="/img/nlogo.png" alt="Blucid Enterprise Logo" class="h-10 w-auto object-contain group-hover:scale-105 transition-transform">
           </div>
 
-          <nav class="space-y-0.5">
-            <a role="button" tabindex="0" (keydown.enter)="activeSection.set('dashboard')" matRipple (click)="activeSection.set('dashboard')" [ngClass]="activeSection() === 'dashboard' ? 'bg-primary text-white font-bold shadow-md shadow-primary/20' : 'text-slate-400 hover:text-white hover:bg-white/5'" class="flex items-center justify-between gap-4 px-4 py-3 rounded-xl transition-all cursor-pointer group">
+          <nav class="w-[180px] -ml-[20px] pr-0 mr-0 space-y-0.5">
+            <a role="button" tabindex="0" (keydown.enter)="activeSection.set('dashboard')" matRipple (click)="activeSection.set('dashboard')" [ngClass]="activeSection() === 'dashboard' ? 'bg-primary text-white font-bold shadow-md shadow-primary/20' : 'text-slate-400 hover:text-white hover:bg-white/5'" class="flex items-center justify-between gap-4 px-4 w-[160px] h-[40px] rounded-xl transition-all cursor-pointer group">
               <div class="flex items-center gap-4">
                 <mat-icon class="transition-colors" [class.text-white]="activeSection() === 'dashboard'">dashboard</mat-icon>
                 <span class="text-[50%]">Dashboard</span>
               </div>
             </a>
 
-            <a role="button" tabindex="0" (keydown.enter)="activeSection.set('services')" matRipple (click)="activeSection.set('services')" [ngClass]="activeSection() === 'services' ? 'bg-primary text-white font-bold shadow-md shadow-primary/20' : 'text-slate-400 hover:text-white hover:bg-white/5'" class="flex items-center gap-4 px-4 py-3 rounded-xl transition-all cursor-pointer">
+            <a role="button" tabindex="0" (keydown.enter)="activeSection.set('services')" matRipple (click)="activeSection.set('services')" [ngClass]="activeSection() === 'services' ? 'bg-primary text-white font-bold shadow-md shadow-primary/20' : 'text-slate-400 hover:text-white hover:bg-white/5'" class="flex items-center gap-4 px-4 w-[160px] h-[40px] rounded-xl transition-all cursor-pointer">
               <mat-icon [class.text-white]="activeSection() === 'services'">handyman</mat-icon>
               <span class="text-[50%]">Manage Services</span>
             </a>
 
-            <a role="button" tabindex="0" (keydown.enter)="activeSection.set('products')" matRipple (click)="activeSection.set('products')" [ngClass]="activeSection() === 'products' ? 'bg-primary text-white font-bold shadow-md shadow-primary/20' : 'text-slate-400 hover:text-white hover:bg-white/5'" class="flex items-center gap-4 px-4 py-3 rounded-xl transition-all cursor-pointer">
+            <a role="button" tabindex="0" (keydown.enter)="activeSection.set('products')" matRipple (click)="activeSection.set('products')" [ngClass]="activeSection() === 'products' ? 'bg-primary text-white font-bold shadow-md shadow-primary/20' : 'text-slate-400 hover:text-white hover:bg-white/5'" class="flex items-center gap-4 px-4 w-[160px] h-[40px] rounded-xl transition-all cursor-pointer">
               <mat-icon [class.text-white]="activeSection() === 'products'">inventory_2</mat-icon>
               <span class="text-[50%]">Manage Products</span>
             </a>
 
-            <a role="button" tabindex="0" (keydown.enter)="activeSection.set('jobs')" matRipple (click)="activeSection.set('jobs')" [ngClass]="activeSection() === 'jobs' ? 'bg-primary text-white font-bold shadow-md shadow-primary/20' : 'text-slate-400 hover:text-white hover:bg-white/5'" class="flex items-center gap-4 px-4 py-3 rounded-xl transition-all cursor-pointer">
+            <a role="button" tabindex="0" (keydown.enter)="activeSection.set('jobs')" matRipple (click)="activeSection.set('jobs')" [ngClass]="activeSection() === 'jobs' ? 'bg-primary text-white font-bold shadow-md shadow-primary/20' : 'text-slate-400 hover:text-white hover:bg-white/5'" class="flex items-center gap-4 px-4 w-[160px] h-[40px] rounded-xl transition-all cursor-pointer">
               <mat-icon [class.text-white]="activeSection() === 'jobs'">assignment_turned_in</mat-icon>
               <span class="text-[50%]">Service Orders</span>
             </a>
@@ -102,6 +101,83 @@ interface ServiceJob {
           </div>
         }
 
+        <!-- How It Works Modal -->
+        @if (showHowItWorks()) {
+          <div role="button" tabindex="0" (keydown.enter)="showHowItWorks.set(false)" (keydown.escape)="showHowItWorks.set(false)" class="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-8 bg-black/60 backdrop-blur-sm transition-all duration-300 animate-in fade-in duration-300" (click)="showHowItWorks.set(false)">
+            <div class="bg-white rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" tabindex="0" role="dialog" aria-labelledby="how-it-works-title">
+              <header class="px-6 py-4 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-md z-10">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                    <mat-icon>info</mat-icon>
+                  </div>
+                  <h2 id="how-it-works-title" class="text-xl font-black font-display text-secondary m-0 leading-none">How It Works: Admin System</h2>
+                </div>
+                <button (click)="showHowItWorks.set(false)" class="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </header>
+              <div class="p-6 sm:p-8 overflow-y-auto flex-grow text-slate-600 bg-slate-50/50">
+                <div class="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
+                  
+                  <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-primary text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                      <span class="font-bold text-sm">1</span>
+                    </div>
+                    <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-5 rounded-2xl shadow-sm border border-slate-100 mb-0">
+                      <h3 class="text-lg font-black text-secondary mb-2 flex items-center gap-2"><mat-icon class="text-primary !text-[20px] !w-5 !h-5">dashboard</mat-icon> Dashboard Overview</h3>
+                      <p class="text-sm border-l-2 border-primary/20 pl-3">Provides a real-time, high-level summary of your business metrics. You can monitor active projects, service orders, customer inquiries, and overall system health at a glance.</p>
+                    </div>
+                  </div>
+                  
+                  <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-primary text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                      <span class="font-bold text-sm">2</span>
+                    </div>
+                    <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-5 rounded-2xl shadow-sm border border-slate-100 mb-0">
+                      <h3 class="text-lg font-black text-secondary mb-2 flex items-center gap-2"><mat-icon class="text-primary !text-[20px] !w-5 !h-5">handyman</mat-icon> Manage Services & Products</h3>
+                      <p class="text-sm border-l-2 border-primary/20 pl-3">Add, edit, and organize the services and products displayed on the public website. Update descriptions, features, pricing, and visual assets directly from here.</p>
+                    </div>
+                  </div>
+
+                  <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-primary text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                      <span class="font-bold text-sm">3</span>
+                    </div>
+                    <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-5 rounded-2xl shadow-sm border border-slate-100 mb-0">
+                      <h3 class="text-lg font-black text-secondary mb-2 flex items-center gap-2"><mat-icon class="text-primary !text-[20px] !w-5 !h-5">assignment_turned_in</mat-icon> Service Job Orders</h3>
+                      <p class="text-sm border-l-2 border-primary/20 pl-3">Track and manage ongoing jobs, from dispatching to completion. Create new service tickets, assign technicians, and monitor status updates until resolution.</p>
+                    </div>
+                  </div>
+
+                  <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-primary text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                      <span class="font-bold text-sm">4</span>
+                    </div>
+                    <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-5 rounded-2xl shadow-sm border border-slate-100 mb-0">
+                      <h3 class="text-lg font-black text-secondary mb-2 flex items-center gap-2"><mat-icon class="text-primary !text-[20px] !w-5 !h-5">web</mat-icon> Edit Website Data</h3>
+                      <p class="text-sm border-l-2 border-primary/20 pl-3">A lightweight CMS (Content Management System) that lets you change text, layout elements, contact info, and media displayed on your live site without needing code modifications.</p>
+                    </div>
+                  </div>
+
+                  <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-primary text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                      <span class="font-bold text-sm">5</span>
+                    </div>
+                    <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-5 rounded-2xl shadow-sm border border-slate-100 mb-0">
+                      <h3 class="text-lg font-black text-secondary mb-2 flex items-center gap-2"><mat-icon class="text-primary !text-[20px] !w-5 !h-5">contact_mail</mat-icon> Customer Inquiries</h3>
+                      <p class="text-sm border-l-2 border-primary/20 pl-3">All messages received from customer-facing web forms arrive here. Review, reply, and categorize inquiries to ensure seamless customer service.</p>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+              <footer class="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+                <button (click)="showHowItWorks.set(false)" class="px-6 py-2.5 rounded-xl bg-slate-200 text-slate-700 font-bold text-sm hover:bg-slate-300 transition-colors">Got it</button>
+              </footer>
+            </div>
+          </div>
+        }
+
         <!-- Top Header -->
         <header class="flex items-center justify-between px-4 sm:px-8 py-3 bg-white/80 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-40 w-full shadow-sm">
           <!-- Mobile Brand & Breadcrumb -->
@@ -111,9 +187,7 @@ interface ServiceJob {
               <span class="text-secondary text-sm font-black">{{ activeSectionLabel() }}</span>
             </div>
             <div class="lg:hidden flex items-center gap-3">
-              <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
-                <mat-icon class="!w-5 !h-5 !text-[20px] text-white">bolt</mat-icon>
-              </div>
+              <img src="/img/nlogo.png" alt="Blucid" class="h-8 w-auto object-contain">
               <span class="text-lg font-display font-black tracking-tight">{{ activeSectionLabel() }}</span>
             </div>
           </div>
@@ -154,6 +228,7 @@ interface ServiceJob {
                 }
               </div>
             </a>
+
             <a role="button" title="Edit Website" tabindex="0" (keydown.enter)="activeSection.set('website'); isRightSidebarOpen.set(false)" (click)="activeSection.set('website'); isRightSidebarOpen.set(false)" class="flex items-center justify-center w-14 h-14 rounded-2xl transition-all cursor-pointer group" [ngClass]="activeSection() === 'website' ? 'bg-primary text-white shadow-md' : 'text-slate-400 hover:bg-white/5'">
               <mat-icon [class.scale-110]="activeSection() === 'website'" class="transition-transform group-hover:scale-110 !text-2xl">public</mat-icon>
             </a>
@@ -172,7 +247,12 @@ interface ServiceJob {
           
           <div [class.hidden]="activeSection() !== 'dashboard'">
             <div class="mb-8">
-              <h1 class="text-3xl font-display font-black text-secondary leading-tight">Dashboard Overview</h1>
+              <div class="flex items-center gap-3">
+                <h1 class="text-3xl font-display font-black text-secondary leading-tight m-0">Dashboard Overview</h1>
+                <button (click)="showHowItWorks.set(true)" class="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 hover:bg-primary/10 text-slate-400 hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50" matRipple title="How it works">
+                  <mat-icon class="!w-5 !h-5 !text-[20px] leading-none">help_outline</mat-icon>
+                </button>
+              </div>
               <p class="text-slate-800 text-sm mt-1 font-medium">Real-time solar grid & business analytics</p>
             </div>
 
@@ -511,101 +591,162 @@ interface ServiceJob {
                   
                   <!-- Body -->
                   <div class="p-6 sm:p-8 overflow-y-auto bg-slate-50/50 flex-grow custom-scrollbar">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                      <!-- Left Column -->
-                      <div class="space-y-6">
-                        <div class="bg-white p-6 rounded-[1.5rem] border border-slate-100 shadow-sm space-y-6">
+                    <div class="space-y-10">
+                      <!-- Section 1: Basic Info -->
+                      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-6">
+                          <h4 class="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2 mb-2"><mat-icon class="!text-sm text-primary">info</mat-icon> Primary Information</h4>
                           <div>
                             <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Service Title</div>
                             <input type="text" [(ngModel)]="selectedService()!.title" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-secondary focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner">
                           </div>
                           
-                          <div>
-                            <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Material Icon Name</div>
-                            <div class="flex gap-4">
-                              <input type="text" [(ngModel)]="selectedService()!.icon" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-secondary focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner" placeholder="e.g. electrical_services">
-                              <div class="w-[50px] h-[50px] rounded-xl bg-slate-100 flex items-center justify-center shrink-0 border border-slate-200 text-slate-500">
-                                <mat-icon>{{selectedService()!.icon}}</mat-icon>
+                          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Material Icon Name</div>
+                              <div class="flex gap-4">
+                                <input type="text" [(ngModel)]="selectedService()!.icon" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-secondary focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner" placeholder="e.g. electrical_services">
+                                <div class="w-[50px] h-[50px] rounded-xl bg-slate-100 flex items-center justify-center shrink-0 border border-slate-200 text-slate-500">
+                                  <mat-icon>{{selectedService()!.icon}}</mat-icon>
+                                </div>
                               </div>
+                            </div>
+                            <div>
+                               <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Features (List tags)</div>
+                               <input type="text" [ngModel]="selectedService()!.features?.join(', ')" (ngModelChange)="updateFeatures($event)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-secondary focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner" placeholder="Feature A, Feature B">
                             </div>
                           </div>
 
                           <div>
-                            <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Description</div>
-                            <textarea [(ngModel)]="selectedService()!.description" rows="4" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-secondary focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner"></textarea>
+                            <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Short Preview Description</div>
+                            <textarea [(ngModel)]="selectedService()!.description" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-secondary focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner" placeholder="Visible on the services listing page..."></textarea>
                           </div>
-                          
-                          <div>
-                            <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Features (Comma separated)</div>
-                            <input type="text" [ngModel]="selectedService()!.features?.join(', ')" (ngModelChange)="updateFeatures($event)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-secondary focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-inner" placeholder="e.g. Site Assessment, Grid Connection">
-                          </div>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col">
+                           <h4 class="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2 mb-6"><mat-icon class="!text-sm text-primary">image</mat-icon> Visual Presentation</h4>
+                           <div class="flex flex-col gap-6 h-full justify-center">
+                              <div class="relative group/svc-hero aspect-video rounded-3xl bg-slate-50 border border-slate-100 overflow-hidden flex items-center justify-center shadow-inner">
+                                 @if (selectedService()!.image) {
+                                   <img [src]="selectedService()!.image" class="w-full h-full object-cover" alt="service preview" referrerpolicy="no-referrer">
+                                   <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover/svc-hero:opacity-100 transition-opacity flex items-center justify-center">
+                                      <button (click)="selectedService()!.image = ''" class="w-10 h-10 bg-rose-500 text-white rounded-xl flex items-center justify-center hover:scale-110 transition-transform">
+                                        <mat-icon>delete</mat-icon>
+                                      </button>
+                                   </div>
+                                 } @else {
+                                    <div class="text-slate-300 flex flex-col items-center gap-2 scale-125">
+                                      <mat-icon class="!text-5xl !w-12 !h-12">add_photo_alternate</mat-icon>
+                                      <span class="text-[10px] font-black uppercase tracking-widest">No Banner Image</span>
+                                    </div>
+                                 }
+                              </div>
+                              <div class="space-y-4">
+                                <div>
+                                  <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Asset URL / Source</div>
+                                  <input type="text" [(ngModel)]="selectedService()!.image" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs text-secondary outline-none focus:border-blue-500 transition-colors" placeholder="https://...">
+                                </div>
+                                <button mat-stroked-button class="w-full !rounded-xl !border-slate-200 !h-12 !text-slate-600 relative overflow-hidden">
+                                  <span class="flex items-center justify-center gap-2 font-bold"><mat-icon>cloud_upload</mat-icon> Upload Image</span>
+                                  <input type="file" accept="image/*" (change)="onImageUpload($event, 'service')" class="absolute inset-0 opacity-0 cursor-pointer">
+                                </button>
+                              </div>
+                           </div>
                         </div>
                       </div>
 
-                      <!-- Right Column -->
-                      <div class="space-y-6">
-                        <div class="bg-white p-6 rounded-[1.5rem] border border-slate-100 shadow-sm">
-                          <h4 class="text-sm font-bold text-secondary flex items-center gap-2 mb-4"><mat-icon class="text-slate-400">image</mat-icon> Featured Image</h4>
-                          
-                          <div class="flex flex-col xl:flex-row gap-4 items-center bg-slate-50 p-4 rounded-2xl border border-slate-100 relative">
-                            <div class="w-full sm:w-28 h-40 sm:h-28 rounded-xl bg-white border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center shadow-inner relative group/svc-img">
-                              @if (selectedService()!.image) {
-                                <img [src]="selectedService()!.image" class="w-full h-full object-cover" alt="service image">
-                                <div class="absolute inset-0 bg-secondary/40 flex items-center justify-center opacity-0 group-hover/svc-img:opacity-100 transition-opacity backdrop-blur-[2px]">
-                                  <button (click)="selectedService()!.image = ''" class="p-1.5 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors shadow-lg" title="Erase Image">
-                                    <mat-icon class="!text-sm !w-auto !h-auto">delete</mat-icon>
-                                  </button>
-                                </div>
-                              } @else {
-                                <mat-icon class="text-slate-200 !text-4xl flex items-center justify-center">add_photo_alternate</mat-icon>
-                              }
+                      <!-- Section 2: Detailed Content -->
+                      <div class="bg-white p-6 sm:p-8 rounded-[2rem] border border-slate-100 shadow-sm space-y-6">
+                        <h4 class="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2 border-b border-slate-50 pb-4"><mat-icon class="!text-sm text-primary">description</mat-icon> Deep-Dive Content</h4>
+                        <div>
+                           <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Long Description (Detailed Page)</div>
+                           <textarea [(ngModel)]="selectedService()!.longDescription" rows="8" class="w-full bg-slate-50 border border-slate-200 rounded-3xl px-6 py-6 text-base text-slate-700 leading-relaxed focus:outline-none focus:bg-white focus:ring-4 focus:ring-blue-500/5 transition-all shadow-inner" placeholder="Detailed service description for the stand-alone page..."></textarea>
+                        </div>
+                      </div>
+
+                      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Step by Step -->
+                        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col">
+                            <div class="flex items-center justify-between mb-6">
+                              <h4 class="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2"><mat-icon class="!text-sm text-primary">format_list_numbered</mat-icon> Process Steps</h4>
+                              <button mat-flat-button class="!bg-primary/10 !text-primary !font-black !rounded-xl !h-8 px-4" (click)="addServiceProcess()">+ STEP</button>
                             </div>
-                            <div class="flex-grow w-full space-y-2">
-                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Image Source URL</div>
-                              <input type="text" [(ngModel)]="selectedService()!.image" placeholder="https://" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-secondary focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all shadow-sm">
-                              
-                              <button mat-stroked-button class="w-full !rounded-xl !border-slate-200 !text-slate-500 hover:!bg-slate-100 !h-10 relative overflow-hidden !text-xs !font-bold tracking-wide">
-                                <span class="flex items-center gap-1.5 justify-center"><mat-icon class="!text-[16px]">file_upload</mat-icon> Upload Image File</span>
-                                <input type="file" accept="image/*" (change)="onImageUpload($event, 'service')" class="absolute inset-0 opacity-0 cursor-pointer">
-                              </button>
+                            <div class="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                               @for (step of selectedService()!.process; track $index; let i = $index) {
+                                  <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 relative group/step shadow-sm">
+                                    <div class="flex items-center gap-3 mb-4">
+                                      <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-black text-xs shrink-0 shadow-lg shadow-primary/20">{{i+1}}</div>
+                                      <input type="text" [(ngModel)]="step.title" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-secondary outline-none focus:border-primary transition-colors h-10" placeholder="Step Title">
+                                      <button (click)="removeServiceProcess(i)" class="text-rose-500 opacity-0 group-hover/step:opacity-100 transition-opacity"><mat-icon>cancel</mat-icon></button>
+                                    </div>
+                                    <textarea [(ngModel)]="step.desc" rows="2" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-600 outline-none focus:border-primary transition-all resize-none" placeholder="Explain this step..."></textarea>
+                                  </div>
+                               }
+                               @if (!selectedService()!.process?.length) {
+                                  <p class="text-[10px] font-black uppercase text-slate-400 text-center py-10 tracking-widest border-2 border-dashed border-slate-100 rounded-3xl">No steps defined yet</p>
+                               }
                             </div>
-                          </div>
                         </div>
 
-                        <div class="bg-white p-6 rounded-[1.5rem] border border-slate-100 shadow-sm flex flex-col max-h-[400px]">
-                          <div class="flex justify-between items-center mb-4 shrink-0">
-                            <div>
-                              <h4 class="text-sm font-bold text-secondary flex items-center gap-2"><mat-icon class="text-slate-400">format_list_numbered</mat-icon> Step-by-Step Process</h4>
+                        <!-- Benefits -->
+                        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col">
+                            <div class="flex items-center justify-between mb-6">
+                              <h4 class="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2"><mat-icon class="!text-sm text-primary">auto_awesome</mat-icon> Key Benefits</h4>
+                              <button mat-flat-button class="!bg-primary/10 !text-primary !font-black !rounded-xl !h-8 px-4" (click)="addServiceBenefit()">+ BENEFIT</button>
                             </div>
-                            <button mat-flat-button class="!bg-blue-50 !text-blue-600 !font-bold !rounded-xl !h-[36px] px-4 hover:!bg-blue-100 transition-colors" (click)="addServiceProcess()">
-                              <span class="flex items-center gap-1.5"><mat-icon class="!text-[18px]">add</mat-icon> <span class="hidden sm:inline">Add Step</span></span>
-                            </button>
-                          </div>
-                          
-                          <div class="space-y-4 overflow-y-auto pr-2 custom-scrollbar pb-2">
-                            @for (step of selectedService()!.process; track $index; let i = $index) {
-                              <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 relative group/step shadow-sm">
-                                <button mat-icon-button class="absolute -top-3 -right-3 bg-white text-rose-500 shadow-md border border-slate-100 !w-8 !h-8 flex items-center justify-center opacity-0 group-hover/step:opacity-100 transition-opacity hover:scale-110 hover:bg-rose-50" (click)="removeServiceProcess(i)">
-                                  <mat-icon class="!text-[16px] flex items-center justify-center">close</mat-icon>
-                                </button>
-                                <div class="flex flex-col gap-3">
-                                  <div class="flex items-center gap-2 mb-1">
-                                    <div class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-black">{{i + 1}}</div>
-                                    <input type="text" [(ngModel)]="selectedService()!.process[i].title" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold text-secondary focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-sm" placeholder="Title">
+                            <div class="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                               @for (ben of selectedService()!.benefits; track $index; let i = $index) {
+                                  <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 relative group/ben shadow-sm">
+                                    <div class="flex items-center gap-3 mb-4">
+                                      <div class="flex-grow flex gap-3">
+                                         <div class="w-10 h-10 shrink-0">
+                                            <input type="text" [(ngModel)]="ben.icon" class="w-full h-full text-center bg-white border border-slate-200 rounded-xl text-primary font-bold focus:border-primary outline-none" placeholder="icon">
+                                         </div>
+                                         <input type="text" [(ngModel)]="ben.title" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-secondary outline-none focus:border-primary transition-colors h-10" placeholder="Benefit title">
+                                      </div>
+                                      <button (click)="removeServiceBenefit(i)" class="text-rose-500 opacity-0 group-hover/ben:opacity-100 transition-opacity"><mat-icon>cancel</mat-icon></button>
+                                    </div>
+                                    <textarea [(ngModel)]="ben.desc" rows="2" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-600 outline-none focus:border-primary transition-all resize-none" placeholder="Brief explanation of benefit..."></textarea>
                                   </div>
-                                  <div>
-                                    <textarea [(ngModel)]="selectedService()!.process[i].desc" rows="2" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-secondary focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-sm" placeholder="Description"></textarea>
-                                  </div>
-                                </div>
-                              </div>
-                            }
-                            @if (!selectedService()!.process || selectedService()!.process.length === 0) {
-                              <div class="flex flex-col items-baseline justify-center py-8 px-4 text-center border border-dashed border-slate-300 rounded-2xl bg-white">
-                                <p class="text-xs font-bold text-slate-800 w-full">No process steps added.</p>
-                              </div>
-                            }
-                          </div>
+                               }
+                               @if (!selectedService()!.benefits?.length) {
+                                  <p class="text-[10px] font-black uppercase text-slate-400 text-center py-10 tracking-widest border-2 border-dashed border-slate-100 rounded-3xl">No benefits listed</p>
+                               }
+                            </div>
                         </div>
+                      </div>
+
+                      <!-- Section 3: FAQs -->
+                      <div class="bg-white p-6 sm:p-8 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col">
+                         <div class="flex items-center justify-between mb-8">
+                            <h4 class="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2"><mat-icon class="!text-sm text-primary">live_help</mat-icon> Service Specific FAQs</h4>
+                            <button mat-flat-button class="!bg-secondary !text-white !font-black !rounded-xl !h-10 px-6 shadow-lg shadow-secondary/20" (click)="addServiceFAQ()">
+                              <mat-icon class="!text-sm">add</mat-icon> ADD NEW FAQ
+                            </button>
+                         </div>
+                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            @for (faq of selectedService()!.faqs; track $index; let i = $index) {
+                               <div class="bg-slate-50 p-6 rounded-3xl border border-slate-100 relative group/faq hover:shadow-md transition-all">
+                                  <button (click)="removeServiceFAQ(i)" class="absolute -top-2 -right-2 w-8 h-8 bg-rose-500 text-white rounded-xl flex items-center justify-center opacity-0 group-hover/faq:opacity-100 transition-all z-10 shadow-xl"><mat-icon class="!text-sm">close</mat-icon></button>
+                                  <div class="space-y-4">
+                                     <div>
+                                        <div class="block text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Question</div>
+                                        <input type="text" [(ngModel)]="faq.q" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-secondary outline-none focus:ring-2 focus:ring-primary/10 transition-all shadow-sm" placeholder="e.g. How long does it take?">
+                                     </div>
+                                     <div>
+                                        <div class="block text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Expert Answer</div>
+                                        <textarea [(ngModel)]="faq.a" rows="4" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-4 text-xs text-slate-600 leading-relaxed outline-none focus:ring-2 focus:ring-primary/10 transition-all shadow-sm resize-none" placeholder="Provide a detailed response..."></textarea>
+                                     </div>
+                                  </div>
+                               </div>
+                            }
+                         </div>
+                         @if (!selectedService()!.faqs?.length) {
+                             <div class="text-center py-16 bg-slate-50/50 rounded-[3rem] border-2 border-dashed border-slate-100">
+                                <mat-icon class="!text-5xl !w-12 !h-12 text-slate-200 mb-4">quiz</mat-icon>
+                                <p class="text-xs font-black text-slate-400 uppercase tracking-widest">No service FAQs defined</p>
+                             </div>
+                         }
                       </div>
                     </div>
                   </div>
@@ -1077,34 +1218,38 @@ interface ServiceJob {
           </div>
 
           <div [class.hidden]="activeSection() !== 'website'">
-            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-8">
-              <div>
-                <h1 class="text-3xl font-display font-black text-secondary leading-tight">Edit Website</h1>
-                <p class="text-slate-800 text-sm mt-1 font-medium">Customize your landing page and public portal</p>
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-6 mb-10">
+              <div class="space-y-1">
+                <div class="inline-flex items-center gap-2 mb-2 px-3 py-1 bg-emerald-50 dark:bg-emerald-500/10 rounded-full border border-emerald-100 dark:border-emerald-500/20">
+                  <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                  <span class="text-[10px] font-black tracking-widest text-emerald-600 dark:text-emerald-400 uppercase">Live Editor</span>
+                </div>
+                <h1 class="text-4xl font-display font-black text-secondary dark:text-white tracking-tight">Website Configuration</h1>
+                <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Design and manage your public presence across all platform pages.</p>
               </div>
               <div class="flex items-center gap-3 w-full sm:w-auto">
-                <button mat-stroked-button (click)="previewWebsite()" class="!rounded-xl !border-primary !text-primary !font-bold !px-6 w-full sm:w-auto hover:!bg-primary/5">
-                  <span class="flex items-center gap-2"><mat-icon class="!text-[20px]">preview</mat-icon> Preview</span>
+                <button mat-stroked-button (click)="previewWebsite()" class="!rounded-2xl !border-slate-200 dark:!border-slate-700 !text-slate-600 dark:!text-slate-300 !font-bold py-6 !px-6 w-full sm:w-auto hover:!bg-slate-50 dark:hover:!bg-slate-800 transition-colors">
+                  <span class="flex items-center gap-2"><mat-icon class="!text-[20px]">visibility</mat-icon> Preview</span>
                 </button>
-                <button mat-flat-button (click)="saveWebsiteContent()" class="!rounded-xl !bg-primary !text-white !font-bold !px-8 shadow-lg shadow-blue-500/20 w-full sm:w-auto">
-                  Save Changes
+                <button mat-flat-button (click)="saveWebsiteContent()" class="!rounded-2xl !bg-primary !text-white !font-bold py-6 !px-8 shadow-xl shadow-primary/20 w-full sm:w-auto hover:scale-[1.02] transition-transform">
+                  <span class="flex items-center gap-2"><mat-icon class="!text-[20px]">save</mat-icon> Publish Website</span>
                 </button>
               </div>
             </div>
 
             <!-- Tabs -->
-            <div class="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-none border-b border-slate-200 dark:border-slate-700">
-              @for (tab of ['home', 'services', 'products', 'about', 'contact', 'faq', 'footer']; track tab) {
+            <div class="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-none border-b border-slate-200 dark:border-slate-800 relative">
+              @for (tab of ['home', 'services', 'products', 'portfolio', 'about', 'contact', 'faq', 'footer', 'system']; track tab) {
                 <button 
                   (click)="activeWebsiteTab.set($any(tab))" 
-                  class="px-6 py-3 font-bold text-sm capitalize rounded-t-xl transition-colors border-b-2 shrink-0"
-                  [ngClass]="activeWebsiteTab() === tab ? 'text-primary border-primary bg-primary/5' : 'text-slate-500 border-transparent hover:bg-slate-50 dark:hover:bg-slate-800'">
-                  {{ tab === 'home' ? 'Home Page Configuration' : (tab | titlecase) }}
+                  class="px-6 py-3.5 font-bold text-sm capitalize rounded-t-2xl transition-all border-b-2 shrink-0 relative hover:text-primary outline-none"
+                  [ngClass]="activeWebsiteTab() === tab ? 'text-primary border-primary bg-primary/5' : 'text-slate-400 border-transparent hover:bg-slate-50 dark:hover:bg-slate-800/50'">
+                  {{ tab === 'home' ? 'Home' : (tab === 'portfolio' ? 'Portfolio' : (tab | titlecase)) }}
                 </button>
               }
             </div>
 
-            <div class="bg-white dark:bg-slate-800 rounded-3xl p-4 md:p-8 border border-slate-200 dark:border-slate-700 shadow-sm relative">
+            <div class="bg-white dark:bg-slate-900 rounded-[2.5rem] p-6 sm:p-8 lg:p-12 border border-slate-200/60 dark:border-slate-800 shadow-xl shadow-slate-200/20 dark:shadow-none relative">
               @if (activeWebsiteTab() === 'home') {
                 <div class="flex items-center justify-between mb-8">
                   <div>
@@ -1171,24 +1316,13 @@ interface ServiceJob {
                           <p class="text-[9px] text-slate-800 font-bold mt-3 uppercase tracking-wider px-1">* Images will auto-play as a carousel on the home page. Ideal size: 1920x1080px.</p>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="grid grid-cols-1 gap-8">
                           
-                          <div class="space-y-6">
-                            <div>
+                          <div>
                                 <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
                                   <mat-icon class="!text-xs !w-auto !h-auto">format_bold</mat-icon> Main Headline
                                 </div>
                                 <textarea [(ngModel)]="websiteData().home.heroTitle" rows="3" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-4 text-base font-black text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none shadow-sm placeholder:text-slate-300" placeholder="Main Hero Title..."></textarea>
-                            </div>
-                            <div>
-                                <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                  <mat-icon class="!text-xs !w-auto !h-auto">text_fields</mat-icon> Trust indicator Label
-                                </div>
-                                <div class="relative">
-                                  <input type="text" [(ngModel)]="websiteData().home.heroTrustText" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-12 py-3.5 text-sm font-bold text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm">
-                                  <mat-icon class="absolute left-4 top-1/2 -translate-y-1/2 text-primary">verified</mat-icon>
-                                </div>
-                            </div>
                           </div>
                           
                           <div>
@@ -1197,95 +1331,6 @@ interface ServiceJob {
                               </div>
                               <textarea [(ngModel)]="websiteData().home.heroSubtitle" rows="7" class="w-full h-[calc(100%-32px)] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-4 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none shadow-sm leading-relaxed" placeholder="Supporting text content..."></textarea>
                           </div>
-                        </div>
-                      </div>
-                    }
-                  </div>
-
-                  <!-- Brands Marquee Section (Accordion Style) -->
-                  <div class="group/section bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 overflow-hidden transition-all duration-300 hover:border-primary/20">
-                    <div class="flex items-center justify-between p-6 cursor-pointer select-none" (click)="activeAccordionSection.set(activeAccordionSection() === 'brands' ? '' : 'brands')" (keydown.enter)="activeAccordionSection.set(activeAccordionSection() === 'brands' ? '' : 'brands')" tabindex="0" role="button">
-                      <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-primary shadow-sm group-hover/section:scale-110 transition-transform duration-500">
-                          <mat-icon>branding_watermark</mat-icon>
-                        </div>
-                        <div>
-                          <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Partner Ecosystem</h4>
-                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Scrolling Brands & Suppliers</p>
-                        </div>
-                      </div>
-                      <div class="flex items-center gap-4">
-                        <div class="hidden sm:flex bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">{{websiteData().home.brands?.length || 0}} Active</div>
-                        <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'brands'">expand_more</mat-icon>
-                      </div>
-                    </div>
-                    
-                    @if (activeAccordionSection() === 'brands') {
-                      <div class="px-6 pb-8 animate-in fade-in slide-in-from-top-4 duration-500">
-                        <div class="h-px bg-slate-200 dark:bg-slate-800 mb-8"></div>
-                        
-                        <div class="flex justify-between items-center mb-6">
-                           <p class="text-[10px] font-black text-slate-800 uppercase tracking-widst">Managed Brand Cards</p>
-                           <button mat-flat-button class="!bg-primary !text-white !font-black !rounded-xl shadow-lg shadow-primary/20" (click)="addBrand()">
-                             <mat-icon class="!text-sm">add</mat-icon> New Brand
-                           </button>
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                          @for (brand of websiteData().home.brands; track $index; let i = $index) {
-                            <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-700 relative group animate-in zoom-in-95 duration-300 shadow-sm hover:shadow-xl transition-all h-full flex flex-col">
-                              <button (click)="removeBrand(i)" class="absolute -top-2 -right-2 w-8 h-8 bg-rose-500 text-white rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-xl z-20 hover:scale-110 active:scale-95">
-                                <mat-icon class="!text-sm">close</mat-icon>
-                              </button>
-                              
-                              <div class="flex-grow space-y-6">
-                                <!-- Brand Logo Display -->
-                                <div class="relative aspect-video rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 overflow-hidden group/logo flex items-center justify-center p-4">
-                                  @if (brand.img) {
-                                    <img [src]="brand.img" [alt]="brand.name" class="max-w-full max-h-full object-contain transition-transform duration-500 group-hover/logo:scale-110" referrerpolicy="no-referrer">
-                                  } @else if (brand.icon) {
-                                    <div class="flex flex-col items-center gap-2">
-                                      <mat-icon class="!text-3xl text-primary">{{brand.icon}}</mat-icon>
-                                      <span class="text-[8px] font-black uppercase text-slate-400 tracking-widest">Icon Fallback</span>
-                                    </div>
-                                  } @else {
-                                    <mat-icon class="!text-3xl text-slate-200">add_photo_alternate</mat-icon>
-                                  }
-                                  
-                                  <!-- Hover controls for image -->
-                                  <div class="absolute inset-0 bg-secondary/40 flex items-center justify-center gap-3 opacity-0 group-hover/logo:opacity-100 transition-opacity backdrop-blur-[2px]">
-                                    @if (brand.img) {
-                                      <button (click)="selectedViewImage.set(brand.img)" class="w-8 h-8 bg-white/20 hover:bg-white text-white hover:text-secondary rounded-lg flex items-center justify-center transition-all shadow-lg">
-                                        <mat-icon class="!text-[16px]">zoom_in</mat-icon>
-                                      </button>
-                                    }
-                                    <div class="relative w-8 h-8 bg-primary text-white rounded-lg flex items-center justify-center hover:bg-primary-dark transition-colors shadow-lg cursor-pointer">
-                                      <mat-icon class="!text-[16px]">upload</mat-icon>
-                                      <input type="file" accept="image/*" (change)="onImageUpload($event, 'website', i, 'home-brand')" class="absolute inset-0 opacity-0 cursor-pointer">
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div class="space-y-4 pt-2">
-                                  <div>
-                                    <label [for]="'brand-name-' + i" class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Brand Name</label>
-                                    <input [id]="'brand-name-' + i" type="text" [(ngModel)]="brand.name" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-3 text-sm font-bold text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-inner" placeholder="e.g. SOLARMAX">
-                                  </div>
-                                  
-                                  <div class="grid grid-cols-2 gap-3">
-                                    <div>
-                                      <label [for]="'brand-icon-' + i" class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Icon ID</label>
-                                      <input [id]="'brand-icon-' + i" type="text" [(ngModel)]="brand.icon" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg px-3 py-2 text-[10px] text-secondary outline-none opacity-60 focus:opacity-100 transition-opacity" placeholder="material_icon">
-                                    </div>
-                                    <div>
-                                      <label [for]="'brand-img-' + i" class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Image Path</label>
-                                      <input [id]="'brand-img-' + i" type="text" [(ngModel)]="brand.img" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg px-3 py-2 text-[10px] text-secondary outline-none opacity-60 focus:opacity-100 transition-opacity" placeholder="/img/logo/...">
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          }
                         </div>
                       </div>
                     }
@@ -1369,195 +1414,49 @@ interface ServiceJob {
                     }
                   </div>
 
-                  <!-- Portfolio Section (Accordion Style) -->
+                  <!-- CTA Section (Accordion Style) -->
                   <div class="group/section bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 overflow-hidden transition-all duration-300 hover:border-primary/20">
-                    <div class="flex items-center justify-between p-6 cursor-pointer select-none" (click)="activeAccordionSection.set(activeAccordionSection() === 'portfolio' ? '' : 'portfolio')" (keydown.enter)="activeAccordionSection.set(activeAccordionSection() === 'portfolio' ? '' : 'portfolio')" tabindex="0" role="button">
+                    <div class="flex items-center justify-between p-6 cursor-pointer select-none" (click)="activeAccordionSection.set(activeAccordionSection() === 'cta' ? '' : 'cta')" (keydown.enter)="activeAccordionSection.set(activeAccordionSection() === 'cta' ? '' : 'cta')" tabindex="0" role="button">
                       <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-primary shadow-sm group-hover/section:scale-110 transition-transform duration-500">
-                          <mat-icon>photo_library</mat-icon>
+                          <mat-icon>call_to_action</mat-icon>
                         </div>
                         <div>
-                          <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Our Portfolio</h4>
-                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Project Showcases & Gallery</p>
+                          <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Call to Action</h4>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Primary Interaction Banner</p>
                         </div>
                       </div>
-                      <div class="flex items-center gap-4">
-                        <div class="hidden sm:flex bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">{{websiteData().home.projects?.length || 0}} Projects</div>
-                        <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'portfolio'">expand_more</mat-icon>
-                      </div>
+                      <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'cta'">expand_more</mat-icon>
                     </div>
-                    
-                    @if (activeAccordionSection() === 'portfolio') {
+                    @if (activeAccordionSection() === 'cta') {
                       <div class="px-6 pb-8 animate-in fade-in slide-in-from-top-4 duration-500">
                         <div class="h-px bg-slate-200 dark:bg-slate-800 mb-8"></div>
-                        
-                        <div class="flex flex-col lg:flex-row justify-between lg:items-center gap-4 mb-8">
-                          <div class="flex items-center gap-3 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700 w-fit">
-                            <button (click)="websiteData().home.portfolioDisplayFormat = 'grid'" [class.bg-white]="websiteData().home.portfolioDisplayFormat === 'grid'" [class.shadow-md]="websiteData().home.portfolioDisplayFormat === 'grid'" [class.text-primary]="websiteData().home.portfolioDisplayFormat === 'grid'" class="px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all">Grid View</button>
-                            <button (click)="websiteData().home.portfolioDisplayFormat = 'carousel'" [class.bg-white]="websiteData().home.portfolioDisplayFormat === 'carousel'" [class.shadow-md]="websiteData().home.portfolioDisplayFormat === 'carousel'" [class.text-primary]="websiteData().home.portfolioDisplayFormat === 'carousel'" class="px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all">Carousel</button>
-                          </div>
-                          <button mat-flat-button class="!bg-primary !text-white !font-black !rounded-2xl !px-6 !py-6 shadow-xl shadow-primary/20 hover:scale-105 transition-transform" (click)="addHomeProject()">
-                            <mat-icon>add_circle</mat-icon> New Portfolio Case
-                          </button>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-                          <div>
-                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                <mat-icon class="!text-xs !w-auto !h-auto">label</mat-icon> Section Tagline
-                              </div>
-                              <input type="text" [(ngModel)]="websiteData().home.portfolioTitle" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3.5 text-sm font-black text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm" placeholder="e.g. Our Portfolio">
-                          </div>
-                          <div>
-                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                <mat-icon class="!text-xs !w-auto !h-auto">format_quote</mat-icon> Display Title
-                              </div>
-                              <input type="text" [(ngModel)]="websiteData().home.projectsTitle" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3.5 text-sm font-black text-secondary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm">
-                          </div>
-                          <div class="md:col-span-2">
-                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                <mat-icon class="!text-xs !w-auto !h-auto">description</mat-icon> Descriptive Context
-                              </div>
-                              <textarea [(ngModel)]="websiteData().home.projectsSubtitle" rows="3" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-4 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm resize-none"></textarea>
-                          </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8" cdkDropList (cdkDropListDropped)="dropProject($event)">
-                          @for (proj of websiteData().home.projects; track $index; let i = $index) {
-                            <div cdkDrag class="bg-white dark:bg-slate-800 p-2 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 relative group/proj shadow-sm hover:shadow-xl transition-all duration-500">
-                              <div class="absolute top-6 right-6 z-30 flex items-center gap-2 transition-opacity translate-y-2 group-hover/proj:translate-y-0 duration-300">
-                                <button mat-icon-button cdkDragHandle class="!bg-white !text-slate-400 cursor-move hover:!text-primary shadow-xl rounded-full sm:opacity-0 sm:group-hover/proj:opacity-100 transition-opacity" title="Drag to reorder">
-                                  <mat-icon>drag_indicator</mat-icon>
-                                </button>
-                                <button mat-icon-button (click)="removeHomeProject(i)" class="!bg-rose-500 !text-white shadow-xl rounded-full hover:!bg-rose-600 sm:opacity-0 sm:group-hover/proj:opacity-100 transition-opacity" title="Delete Project">
-                                  <mat-icon>delete</mat-icon>
-                                </button>
-                              </div>
-
-                              <div class="flex flex-col gap-8 p-4">
-                                <div class="w-full space-y-4">
-                                  <div class="relative group/card rounded-[2rem] overflow-hidden shadow-inner bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 aspect-video">
-                                     @if (websiteData().home.projects[i].image) {
-                                       <img [src]="websiteData().home.projects[i].image" class="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-105" referrerpolicy="no-referrer" alt="project preview">
-                                     } @else {
-                                       <div class="flex flex-col items-center justify-center w-full h-full text-slate-300">
-                                         <mat-icon class="!text-5xl !w-auto !h-auto mb-2">image</mat-icon>
-                                         <span class="text-[10px] font-black uppercase tracking-widest">Main Showcase Missing</span>
-                                       </div>
-                                     }
-                                     
-                                     <!-- Content Overlay -->
-                                     <div class="absolute inset-0 bg-gradient-to-t from-secondary/80 via-transparent to-transparent flex flex-col justify-end p-8 pointer-events-none">
-                                       <div class="bg-primary/90 backdrop-blur-sm self-start px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white mb-2">
-                                          {{websiteData().home.projects[i].systemSize || 'System Size'}}
-                                       </div>
-                                       <h3 class="text-2xl font-black text-white leading-tight">{{websiteData().home.projects[i].title || 'Untitled Project'}}</h3>
-                                     </div>
-
-                                     <!-- Hover Actions Overlay -->
-                                     <div class="absolute inset-0 bg-secondary/60 backdrop-blur-[2px] flex items-center justify-center gap-3 opacity-0 group-hover/card:opacity-100 transition-all duration-300">
-                                       <button (click)="selectedViewImage.set(websiteData().home.projects[i].image)" class="w-12 h-12 bg-white/20 hover:bg-white text-white hover:text-secondary rounded-2xl flex items-center justify-center transition-all shadow-2xl backdrop-blur-md">
-                                         <mat-icon>visibility</mat-icon>
-                                       </button>
-                                       <div class="relative w-12 h-12 bg-primary text-white rounded-2xl flex items-center justify-center shadow-xl hover:scale-110 transition-transform">
-                                         <mat-icon>upload</mat-icon>
-                                         <input type="file" accept="image/*" (change)="onImageUpload($event, 'website', i, 'home-project')" class="absolute inset-0 opacity-0 cursor-pointer">
-                                       </div>
-                                     </div>
-                                  </div>
-                                  
-                                  <div class="space-y-4 px-2">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                      <div class="md:col-span-2">
-                                         <div class="block text-[9px] font-black text-slate-400 uppercase mb-1.5 px-1">Case Study Title</div>
-                                         <input type="text" [(ngModel)]="websiteData().home.projects[i].title" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-3 text-sm font-black text-secondary outline-none focus:ring-1 focus:ring-primary transition-all">
-                                      </div>
-                                      <div>
-                                         <div class="block text-[9px] font-black text-slate-400 uppercase mb-1.5 px-1">Client Name</div>
-                                         <input type="text" [(ngModel)]="websiteData().home.projects[i].client" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-secondary outline-none">
-                                      </div>
-                                      <div>
-                                         <div class="block text-[9px] font-black text-slate-400 uppercase mb-1.5 px-1">Location</div>
-                                         <input type="text" [(ngModel)]="websiteData().home.projects[i].location" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-secondary outline-none">
-                                      </div>
-                                      <div>
-                                         <div class="block text-[9px] font-black text-slate-400 uppercase mb-1.5 px-1">System Size</div>
-                                         <input type="text" [(ngModel)]="websiteData().home.projects[i].systemSize" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-secondary outline-none" placeholder="e.g. 5kWp On-Grid">
-                                      </div>
-                                      <div>
-                                         <div class="block text-[9px] font-black text-slate-400 uppercase mb-1.5 px-1">Completion</div>
-                                         <input type="text" [(ngModel)]="websiteData().home.projects[i].completionDate" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-secondary outline-none">
-                                      </div>
-                                      <div class="md:col-span-2">
-                                         <div class="block text-[9px] font-black text-slate-400 uppercase mb-1.5 px-1">Environmental Impact</div>
-                                         <input type="text" [(ngModel)]="websiteData().home.projects[i].energySaved" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-3 text-sm font-bold text-emerald-600 outline-none" placeholder="e.g. 4.2 Tons CO2 Saved/Year">
-                                      </div>
-                                      <div class="md:col-span-2">
-                                         <div class="block text-[9px] font-black text-slate-400 uppercase mb-1.5 px-1">Project Narrative</div>
-                                         <textarea [(ngModel)]="websiteData().home.projects[i].description" rows="4" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-600 outline-none resize-none"></textarea>
-                                      </div>
-                                    </div>
-
-                                    <!-- Gallery Management -->
-                                    <div class="pt-6 border-t border-slate-100 dark:border-slate-800 mt-2">
-                                       <div class="flex items-center justify-between mb-4">
-                                          <div class="flex items-center gap-2">
-                                            <mat-icon class="text-slate-300 text-sm">collections</mat-icon>
-                                            <h5 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Extended Gallery</h5>
-                                          </div>
-                                          <button mat-button class="!text-primary !font-black !text-[10px] !bg-primary/5 !rounded-lg" (click)="addHomeProjectGalleryImage(i)">+ ADD PHOTO</button>
-                                       </div>
-                                       
-                                       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                                         @for (gimg of websiteData().home.projects[i].gallery; track $index; let gIndex = $index) {
-                                           <div class="relative aspect-square rounded-2xl bg-slate-50 dark:bg-slate-900 overflow-hidden border border-slate-100 dark:border-slate-800 group/gal shadow-sm">
-                                              @if(gimg) {
-                                                <img [src]="gimg" class="w-full h-full object-cover" alt="Gallery Photo">
-                                              } @else {
-                                                <div class="w-full h-full flex flex-col items-center justify-center text-slate-300">
-                                                  <mat-icon class="!text-lg">image</mat-icon>
-                                                </div>
-                                              }
-                                              
-                                              <div class="absolute inset-0 bg-secondary/60 opacity-0 group-hover/gal:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
-                                                <button (click)="selectedViewImage.set(gimg)" class="w-8 h-8 bg-white/20 hover:bg-white text-white hover:text-secondary rounded-lg flex items-center justify-center transition-all backdrop-blur-md">
-                                                  <mat-icon class="!text-[16px]">visibility</mat-icon>
-                                                </button>
-                                                <button (click)="removeHomeProjectGalleryImage(i, gIndex)" class="w-8 h-8 bg-rose-500 text-white rounded-lg flex items-center justify-center hover:bg-rose-600 transition-colors shadow-lg">
-                                                  <mat-icon class="!text-[16px]">delete</mat-icon>
-                                                </button>
-                                                <div class="absolute inset-0 opacity-0 cursor-pointer">
-                                                   <input type="file" accept="image/*" (change)="onImageUpload($event, 'website', i, 'home-project-gallery', gIndex)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
-                                                </div>
-                                              </div>
-                                           </div>
-                                         }
-                                         @if (!websiteData().home.projects[i].gallery?.length) {
-                                           <div class="col-span-full py-8 text-center bg-slate-50/50 dark:bg-slate-900/50 rounded-2xl border-2 border-dashed border-slate-100 dark:border-slate-800">
-                                              <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest">Gallery Empty</p>
-                                           </div>
-                                         }
-                                       </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          }
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                           <div>
+                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">Main Headline</div>
+                              <input [(ngModel)]="websiteData().home.ctaTitle" type="text" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 text-sm font-black text-secondary">
+                           </div>
+                           <div>
+                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">Button Text</div>
+                              <input [(ngModel)]="websiteData().home.ctaButtonText" type="text" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-3 text-sm font-bold text-secondary">
+                           </div>
+                           <div class="md:col-span-2">
+                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">Subtitle</div>
+                              <textarea [(ngModel)]="websiteData().home.ctaSubtitle" rows="3" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded-2xl px-4 py-4 text-sm text-slate-600 resize-none"></textarea>
+                           </div>
                         </div>
                       </div>
                     }
-                  </div>
-
-                  <!-- Our Expertise Content (Accordion) -->
+                  </div>                  <!-- Our Expertise Content (Accordion) -->
                   <div class="group/section bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 overflow-hidden transition-all duration-300 hover:border-primary/20">
                     <div class="flex items-center justify-between p-6 cursor-pointer select-none" (click)="activeAccordionSection.set(activeAccordionSection() === 'expertise' ? '' : 'expertise')" (keydown.enter)="activeAccordionSection.set(activeAccordionSection() === 'expertise' ? '' : 'expertise')" tabindex="0" role="button">
                       <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-primary shadow-sm group-hover/section:scale-110 transition-transform duration-500">
-                          <mat-icon>business_center</mat-icon>
+                          <mat-icon>engineering</mat-icon>
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Our Expertise</h4>
-                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Nature of Business</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Specialization & Capabilities Matrix</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'expertise'">expand_more</mat-icon>
@@ -1567,19 +1466,19 @@ interface ServiceJob {
                       <div class="p-6 pt-0 border-t border-slate-100 dark:border-slate-800">
                         <div class="space-y-4 pt-6">
                             <div>
-                              <div class="block text-[9px] font-black text-slate-400 uppercase mb-1.5 px-1">Section Title</div>
+                              <div class="block text-[9px] font-black text-slate-400 uppercase mb-1.5 px-1">Expertise Section Title</div>
                               <input type="text" [(ngModel)]="websiteData().home.businessNaturesTitle" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm font-bold text-secondary outline-none focus:border-primary/50 transition-colors shadow-sm">
                             </div>
                             <div>
-                              <div class="block text-[9px] font-black text-slate-400 uppercase mb-1.5 px-1">Section Subtitle</div>
+                              <div class="block text-[9px] font-black text-slate-400 uppercase mb-1.5 px-1">Contextual Subheader</div>
                               <textarea [(ngModel)]="websiteData().home.businessNaturesSubtitle" rows="2" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-600 outline-none resize-none focus:border-primary/50 transition-colors shadow-sm"></textarea>
                             </div>
                         </div>
 
                         <div class="mt-8">
                           <div class="flex items-center justify-between mb-4">
-                            <h5 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Expertise Items</h5>
-                            <button mat-button class="!bg-primary/10 !text-primary !rounded-xl !px-4 !py-1 !font-bold !text-[10px] tracking-widest" (click)="addBusinessNature()"><mat-icon class="!text-[14px] mr-1">add</mat-icon> ADD NATUTRE OF BUSINESS</button>
+                            <h5 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Capabilities Inventory</h5>
+                            <button mat-button class="!bg-primary/10 !text-primary !rounded-xl !px-4 !py-1 !font-bold !text-[10px] tracking-widest" (click)="addBusinessNature()"><mat-icon class="!text-[14px] mr-1">add</mat-icon> ADD CAPABILITY</button>
                           </div>
                           
                           <div cdkDropList (cdkDropListDropped)="dropBusinessNature($event)" class="space-y-3">
@@ -1621,6 +1520,7 @@ interface ServiceJob {
                       </div>
                     }
                   </div>
+>
 
                   <!-- Promotional Video Content (Accordion) -->
                   <div class="group/section bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 overflow-hidden transition-all duration-300 hover:border-primary/20">
@@ -1766,164 +1666,6 @@ interface ServiceJob {
                       </div>
                     }
                   </div>
-
-                  <!-- Global CTA (Accordion) -->
-                  <div class="group/section bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 overflow-hidden transition-all duration-300 hover:border-primary/20">
-                    <div class="flex items-center justify-between p-6 cursor-pointer select-none" (click)="activeAccordionSection.set(activeAccordionSection() === 'cta' ? '' : 'cta')" (keydown.enter)="activeAccordionSection.set(activeAccordionSection() === 'cta' ? '' : 'cta')" tabindex="0" role="button">
-                      <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-primary shadow-sm group-hover/section:scale-110 transition-transform duration-500">
-                          <mat-icon>campaign</mat-icon>
-                        </div>
-                        <div>
-                          <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Call to Action</h4>
-                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Global Conversion Banner</p>
-                        </div>
-                      </div>
-                      <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'cta'">expand_more</mat-icon>
-                    </div>
-
-                    @if (activeAccordionSection() === 'cta') {
-                      <div class="px-6 pb-8 animate-in fade-in slide-in-from-top-4 duration-500">
-                        <div class="h-px bg-slate-200 dark:bg-slate-800 mb-8"></div>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                          <div class="md:col-span-2">
-                             <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Headline Trigger</div>
-                             <input type="text" [(ngModel)]="websiteData().home.ctaTitle" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-4 text-sm font-black text-secondary outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm" placeholder="e.g. Ready to Power Your Future?">
-                          </div>
-                          <div>
-                             <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Encouraging Narrative</div>
-                             <textarea [(ngModel)]="websiteData().home.ctaSubtitle" rows="4" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-4 text-sm text-slate-600 outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm resize-none"></textarea>
-                          </div>
-                          <div>
-                             <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Button Label</div>
-                             <input type="text" [(ngModel)]="websiteData().home.ctaButtonText" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-4 text-sm font-black text-secondary outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm">
-                             
-                             <div class="mt-8 p-4 bg-primary/5 rounded-2xl border border-primary/10 flex items-start gap-3">
-                               <mat-icon class="text-primary mt-0.5">info</mat-icon>
-                               <div class="text-[10px] text-slate-500 font-medium leading-relaxed uppercase tracking-wider">
-                                 The CTA section is a global component designed to drive conversions. Use strong action verbs for the button and headline.
-                               </div>
-                             </div>
-                          </div>
-                        </div>
-                      </div>
-                    }
-                  </div>
-
-                  <!-- Proposal & Social Proof (Accordion) -->
-                  <div class="group/section bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 overflow-hidden transition-all duration-300 hover:border-primary/20">
-                    <div class="flex items-center justify-between p-6 cursor-pointer select-none" (click)="activeAccordionSection.set(activeAccordionSection() === 'proof' ? '' : 'proof')" (keydown.enter)="activeAccordionSection.set(activeAccordionSection() === 'proof' ? '' : 'proof')" tabindex="0" role="button">
-                      <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-primary shadow-sm group-hover/section:scale-110 transition-transform duration-500">
-                          <mat-icon>verified</mat-icon>
-                        </div>
-                        <div>
-                          <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Social Proof & Proposals</h4>
-                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Trust Markers & Ratings</p>
-                        </div>
-                      </div>
-                      <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'proof'">expand_more</mat-icon>
-                    </div>
-
-                    @if (activeAccordionSection() === 'proof') {
-                      <div class="px-6 pb-8 animate-in fade-in slide-in-from-top-4 duration-500">
-                        <div class="h-px bg-slate-200 dark:bg-slate-800 mb-8"></div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                          <div>
-                            <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Rating Value</div>
-                            <input type="text" [(ngModel)]="websiteData().home.ratingValue" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3.5 text-sm font-black text-secondary shadow-sm">
-                          </div>
-                          <div>
-                            <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Rating Label</div>
-                            <input type="text" [(ngModel)]="websiteData().home.ratingLabel" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3.5 text-sm text-slate-600 shadow-sm">
-                          </div>
-                          <div class="md:col-span-2 space-y-4">
-                            <h5 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-4">Proposal Disclaimer Block</h5>
-                            <input type="text" [(ngModel)]="websiteData().home.proposalTitle" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3.5 text-sm font-black text-secondary shadow-sm" placeholder="Proposal Title">
-                            <textarea [(ngModel)]="websiteData().home.proposalSubtitle" rows="2" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-4 text-sm text-slate-600 resize-none shadow-sm"></textarea>
-                            <input type="text" [(ngModel)]="websiteData().home.proposalButtonText" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3.5 text-sm font-bold text-primary shadow-sm" placeholder="Button Text">
-                          </div>
-                        </div>
-                      </div>
-                    }
-                  </div>
-
-                  <!-- Typography & Styling (Accordion) -->
-                  <div class="group/section bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 overflow-hidden transition-all duration-300 hover:border-primary/20">
-                    <div class="flex items-center justify-between p-6 cursor-pointer select-none" (click)="activeAccordionSection.set(activeAccordionSection() === 'styles' ? '' : 'styles')" (keydown.enter)="activeAccordionSection.set(activeAccordionSection() === 'styles' ? '' : 'styles')" tabindex="0" role="button">
-                      <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-primary shadow-sm group-hover/section:scale-110 transition-transform duration-500">
-                          <mat-icon>format_paint</mat-icon>
-                        </div>
-                        <div>
-                          <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Typography & Theme</h4>
-                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Fonts, Sizes & Colors</p>
-                        </div>
-                      </div>
-                      <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'styles'">expand_more</mat-icon>
-                    </div>
-
-                    @if (activeAccordionSection() === 'styles') {
-                      <div class="px-6 pb-8 animate-in fade-in slide-in-from-top-4 duration-500">
-                        <div class="h-px bg-slate-200 dark:bg-slate-800 mb-8"></div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                          <div>
-                            <h5 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Font Families</h5>
-                            <div class="space-y-4">
-                              <div>
-                                <div class="block text-[9px] font-black text-slate-400 uppercase mb-1 px-1">Sans Serif (UI)</div>
-                                <input type="text" [(ngModel)]="websiteData().typography.fontSans" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm shadow-inner">
-                              </div>
-                              <div>
-                                <div class="block text-[9px] font-black text-slate-400 uppercase mb-1 px-1">Display (Heads)</div>
-                                <input type="text" [(ngModel)]="websiteData().typography.fontDisplay" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm shadow-inner">
-                              </div>
-                            </div>
-                            
-                            <h5 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-6 mb-4">Header Sizes (Tailwind Scale)</h5>
-                            <div class="grid grid-cols-2 gap-4">
-                              <div>
-                                <div class="block text-[9px] font-black text-slate-400 uppercase mb-1 px-1">H1 Size</div>
-                                <input type="text" [(ngModel)]="websiteData().typography.h1Size" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm shadow-inner" placeholder="e.g. 5xl">
-                              </div>
-                              <div>
-                                <div class="block text-[9px] font-black text-slate-400 uppercase mb-1 px-1">H2 Size</div>
-                                <input type="text" [(ngModel)]="websiteData().typography.h2Size" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm shadow-inner" placeholder="e.g. 3xl">
-                              </div>
-                              <div>
-                                <div class="block text-[9px] font-black text-slate-400 uppercase mb-1 px-1">H3 Size</div>
-                                <input type="text" [(ngModel)]="websiteData().typography.h3Size" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm shadow-inner" placeholder="e.g. 2xl">
-                              </div>
-                              <div>
-                                <div class="block text-[9px] font-black text-slate-400 uppercase mb-1 px-1">H4 Size</div>
-                                <input type="text" [(ngModel)]="websiteData().typography.h4Size" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm shadow-inner" placeholder="e.g. xl">
-                              </div>
-                            </div>
-                          </div>
-                          <div>
-                            <h5 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Primary Theme Colors</h5>
-                            <div class="grid grid-cols-1 gap-4">
-                              <div class="flex items-center gap-4">
-                                <input type="color" [(ngModel)]="websiteData().theme.primary" class="w-12 h-12 rounded-xl cursor-pointer border-none bg-transparent">
-                                <div class="flex-grow">
-                                  <div class="block text-[9px] font-black text-slate-400 uppercase mb-1 px-1">Primary Color</div>
-                                  <input type="text" [(ngModel)]="websiteData().theme.primary" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm font-mono shadow-sm">
-                                </div>
-                              </div>
-                              <div class="flex items-center gap-4">
-                                <input type="color" [(ngModel)]="websiteData().theme.secondary" class="w-12 h-12 rounded-xl cursor-pointer border-none bg-transparent">
-                                <div class="flex-grow">
-                                  <div class="block text-[9px] font-black text-slate-400 uppercase mb-1 px-1">Secondary Color</div>
-                                  <input type="text" [(ngModel)]="websiteData().theme.secondary" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm font-mono shadow-sm">
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    }
-                  </div>
                 </div>
               }
 
@@ -1939,16 +1681,16 @@ interface ServiceJob {
                 </div>
 
                 <div class="space-y-6">
-                  <!-- Header Section -->
+                  <!-- Page Header & Banner -->
                   <div class="group/section bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 overflow-hidden transition-all duration-300 hover:border-primary/20">
                     <div class="flex items-center justify-between p-6 cursor-pointer select-none" (click)="activeAccordionSection.set(activeAccordionSection() === 'serv-header' ? '' : 'serv-header')" (keydown.enter)="activeAccordionSection.set(activeAccordionSection() === 'serv-header' ? '' : 'serv-header')" tabindex="0" role="button">
                       <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-primary shadow-sm group-hover/section:scale-110 transition-transform duration-500">
-                          <mat-icon>view_day</mat-icon>
+                           <mat-icon>art_track</mat-icon>
                         </div>
                         <div>
-                          <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Banner & Header</h4>
-                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Page Hero & Title</p>
+                          <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Page Header & Banner</h4>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Hero Intro Configuration</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'serv-header'">expand_more</mat-icon>
@@ -1960,12 +1702,12 @@ interface ServiceJob {
                         <div class="space-y-8">
                           <div>
                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                               <mat-icon class="!text-xs !w-auto !h-auto">image</mat-icon> Banner Background Image
+                               <mat-icon class="!text-xs !w-auto !h-auto">image</mat-icon> Services Banner Image
                              </div>
                              <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
                                <div class="relative w-full sm:w-24 aspect-video sm:aspect-square rounded-xl bg-slate-100 dark:bg-slate-900 overflow-hidden shrink-0 shadow-inner group/banner">
-                                 <img [src]="websiteData().services.bannerImage" class="w-full h-full object-cover" referrerpolicy="no-referrer" alt="banner preview">
-                                 @if (websiteData().services.bannerImage) {
+                                 @if (websiteData()?.services?.bannerImage) {
+                                   <img [src]="websiteData().services.bannerImage" class="w-full h-full object-cover" referrerpolicy="no-referrer" alt="banner preview">
                                    <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover/banner:opacity-100 transition-opacity">
                                      <button (click)="websiteData().services.bannerImage = ''" class="w-8 h-8 flex items-center justify-center bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors shadow-xl">
                                        <mat-icon class="!text-sm">delete</mat-icon>
@@ -1975,7 +1717,7 @@ interface ServiceJob {
                                </div>
                                <div class="flex-grow w-full space-y-3">
                                  <div class="flex gap-2">
-                                   <input type="text" [(ngModel)]="websiteData().services.bannerImage" placeholder="Enter remote image URL..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none focus:ring-2 focus:ring-primary/20 transition-all">
+                                   <input type="text" [(ngModel)]="websiteData().services.bannerImage" placeholder="Enter image URL..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none focus:ring-2 focus:ring-primary/20 transition-all">
                                    <button mat-flat-button class="!bg-primary !text-white !font-bold !rounded-xl !h-[46px] shrink-0 relative overflow-hidden px-6">
                                      <span class="flex items-center gap-2 whitespace-nowrap"><mat-icon class="!text-[18px]">upload</mat-icon> Browse</span>
                                      <input type="file" accept="image/*" (change)="onImageUpload($event, 'website', 0, 'services')" class="absolute inset-0 opacity-0 cursor-pointer">
@@ -1984,23 +1726,24 @@ interface ServiceJob {
                                </div>
                              </div>
                           </div>
-                          
-                          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Display Header Title</div>
-                                <input type="text" [(ngModel)]="websiteData().services.headerTitle" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3.5 text-sm font-black text-secondary focus:ring-2 focus:ring-primary/20 outline-none transition-all shadow-sm">
+                          @if(websiteData().services) {
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <div>
+                                  <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1 text-primary">Display Headline</div>
+                                  <input type="text" [(ngModel)]="websiteData().services.headerTitle" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-4 text-sm font-black text-secondary outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm">
+                              </div>
+                              <div>
+                                  <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Contextual Subheader</div>
+                                  <input type="text" [(ngModel)]="websiteData().services.headerSubtitle" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-4 text-sm text-slate-500 outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm">
+                              </div>
                             </div>
-                            <div>
-                                <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Supporting Header Subtitle</div>
-                                <input type="text" [(ngModel)]="websiteData().services.headerSubtitle" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3.5 text-sm text-slate-600 focus:ring-2 focus:ring-primary/20 outline-none transition-all shadow-sm">
-                            </div>
-                          </div>
+                          }
                         </div>
                       </div>
                     }
                   </div>
 
-                  <!-- Secondary Content Section -->
+                  <!-- Secondary Narrative -->
                   <div class="group/section bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 overflow-hidden transition-all duration-300 hover:border-primary/20">
                     <div class="flex items-center justify-between p-6 cursor-pointer select-none" (click)="activeAccordionSection.set(activeAccordionSection() === 'serv-secondary' ? '' : 'serv-secondary')" (keydown.enter)="activeAccordionSection.set(activeAccordionSection() === 'serv-secondary' ? '' : 'serv-secondary')" tabindex="0" role="button">
                       <div class="flex items-center gap-4">
@@ -2089,7 +1832,7 @@ interface ServiceJob {
                                <div>
                                  <div class="flex items-center justify-between mb-4">
                                    <h5 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Benefits</h5>
-                                   <button mat-button class="!bg-primary/10 !text-primary !rounded-xl !px-4 !py-1 !font-bold !text-[10px] tracking-widest" (click)="addServiceBenefit()"><mat-icon class="!text-[14px] mr-1">add</mat-icon> ADD BENEFIT</button>
+                                   <button mat-button class="!bg-primary/10 !text-primary !rounded-xl !px-4 !py-1 !font-bold !text-[10px] tracking-widest" (click)="addServiceDetailBenefit()"><mat-icon class="!text-[14px] mr-1">add</mat-icon> ADD BENEFIT</button>
                                  </div>
                                  <div class="space-y-3">
                                    @for (benefit of websiteData().services.serviceDetails[selectedServiceDetailId()].benefits; track $index; let i = $index) {
@@ -2108,7 +1851,7 @@ interface ServiceJob {
                                             <textarea [(ngModel)]="websiteData().services.serviceDetails[selectedServiceDetailId()].benefits[i].desc" rows="2" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-600 outline-none resize-none focus:bg-white transition-colors"></textarea>
                                          </div>
                                        </div>
-                                       <button (click)="removeServiceBenefit(i)" class="w-10 h-10 flex-shrink-0 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center hover:bg-rose-500 hover:text-white transition-colors self-start">
+                                       <button (click)="removeServiceDetailBenefit(i)" class="w-10 h-10 flex-shrink-0 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center hover:bg-rose-500 hover:text-white transition-colors self-start">
                                          <mat-icon>delete</mat-icon>
                                        </button>
                                      </div>
@@ -2119,7 +1862,7 @@ interface ServiceJob {
                                <div>
                                  <div class="flex items-center justify-between mb-4">
                                    <h5 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Process Steps</h5>
-                                   <button mat-button class="!bg-primary/10 !text-primary !rounded-xl !px-4 !py-1 !font-bold !text-[10px] tracking-widest" (click)="addDetailProcess()"><mat-icon class="!text-[14px] mr-1">add</mat-icon> ADD STEP</button>
+                                   <button mat-button class="!bg-primary/10 !text-primary !rounded-xl !px-4 !py-1 !font-bold !text-[10px] tracking-widest" (click)="addServiceDetailStep()"><mat-icon class="!text-[14px] mr-1">add</mat-icon> ADD STEP</button>
                                  </div>
                                  <div class="space-y-3">
                                    @for (step of websiteData().services.serviceDetails[selectedServiceDetailId()].process; track $index; let i = $index) {
@@ -2134,7 +1877,7 @@ interface ServiceJob {
                                             <textarea [(ngModel)]="websiteData().services.serviceDetails[selectedServiceDetailId()].process[i].desc" rows="2" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-600 outline-none resize-none focus:bg-white transition-colors"></textarea>
                                          </div>
                                        </div>
-                                       <button (click)="removeDetailProcess(i)" class="w-10 h-10 flex-shrink-0 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center hover:bg-rose-500 hover:text-white transition-colors self-start">
+                                       <button (click)="removeServiceDetailStep(i)" class="w-10 h-10 flex-shrink-0 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center hover:bg-rose-500 hover:text-white transition-colors self-start">
                                          <mat-icon>delete</mat-icon>
                                        </button>
                                      </div>
@@ -2145,7 +1888,7 @@ interface ServiceJob {
                                <div>
                                  <div class="flex items-center justify-between mb-4">
                                    <h5 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">FAQs</h5>
-                                   <button mat-button class="!bg-primary/10 !text-primary !rounded-xl !px-4 !py-1 !font-bold !text-[10px] tracking-widest" (click)="addServiceFaq()"><mat-icon class="!text-[14px] mr-1">add</mat-icon> ADD FAQ</button>
+                                   <button mat-button class="!bg-primary/10 !text-primary !rounded-xl !px-4 !py-1 !font-bold !text-[10px] tracking-widest" (click)="addServiceDetailFAQ()"><mat-icon class="!text-[14px] mr-1">add</mat-icon> ADD FAQ</button>
                                  </div>
                                  <div class="space-y-3">
                                    @for (faq of websiteData().services.serviceDetails[selectedServiceDetailId()].faqs; track $index; let i = $index) {
@@ -2160,7 +1903,7 @@ interface ServiceJob {
                                             <textarea [(ngModel)]="websiteData().services.serviceDetails[selectedServiceDetailId()].faqs[i].a" rows="2" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-600 outline-none resize-none focus:bg-white transition-colors"></textarea>
                                          </div>
                                        </div>
-                                       <button (click)="removeServiceFaq(i)" class="w-10 h-10 flex-shrink-0 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center hover:bg-rose-500 hover:text-white transition-colors self-start">
+                                       <button (click)="removeServiceDetailFAQ(i)" class="w-10 h-10 flex-shrink-0 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center hover:bg-rose-500 hover:text-white transition-colors self-start">
                                          <mat-icon>delete</mat-icon>
                                        </button>
                                      </div>
@@ -2176,7 +1919,7 @@ interface ServiceJob {
                   </div>
                 </div>
               }
-
+ 
               @if (activeWebsiteTab() === 'products') {
                 <div class="flex items-center justify-between mb-8">
                   <div>
@@ -2189,62 +1932,292 @@ interface ServiceJob {
                 </div>
 
                 <div class="space-y-6">
-                  <!-- Header Section -->
+                  <!-- Page Header & Banner Section -->
                   <div class="group/section bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 overflow-hidden transition-all duration-300 hover:border-primary/20">
-                    <div class="flex items-center justify-between p-6 cursor-pointer select-none" (click)="activeAccordionSection.set(activeAccordionSection() === 'prod-header' ? '' : 'prod-header')" (keydown.enter)="activeAccordionSection.set(activeAccordionSection() === 'prod-header' ? '' : 'prod-header')" tabindex="0" role="button">
+                    <div class="flex items-center justify-between p-6 cursor-pointer select-none" (click)="activeAccordionSection.set(activeAccordionSection() === 'prod-banner' ? '' : 'prod-banner')" (keydown.enter)="activeAccordionSection.set(activeAccordionSection() === 'prod-banner' ? '' : 'prod-banner')" tabindex="0" role="button">
                       <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-primary shadow-sm group-hover/section:scale-110 transition-transform duration-500">
-                          <mat-icon>branding_watermark</mat-icon>
+                           <mat-icon>art_track</mat-icon>
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Banner & Header</h4>
-                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Landing Hero Configuration</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Hero Intro Configuration</p>
                         </div>
                       </div>
-                      <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'prod-header'">expand_more</mat-icon>
+                      <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'prod-banner'">expand_more</mat-icon>
                     </div>
 
-                    @if (activeAccordionSection() === 'prod-header') {
+                    @if (activeAccordionSection() === 'prod-banner') {
                       <div class="px-6 pb-8 animate-in fade-in slide-in-from-top-4 duration-500">
                         <div class="h-px bg-slate-200 dark:bg-slate-800 mb-8"></div>
+                        
                         <div class="space-y-8">
+                          <!-- Banner Image -->
                           <div>
-                             <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                               <mat-icon class="!text-xs !w-auto !h-auto">landscape</mat-icon> Hero Background Image
-                             </div>
-                             <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
-                               <div class="relative w-full sm:w-24 aspect-video rounded-xl bg-slate-100 dark:bg-slate-900 overflow-hidden shrink-0 shadow-inner group/banner">
-                                 <img [src]="websiteData().products.bannerImage" class="w-full h-full object-cover" referrerpolicy="no-referrer" alt="banner preview">
-                                 @if (websiteData().products.bannerImage) {
-                                   <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover/banner:opacity-100 transition-opacity">
-                                     <button (click)="websiteData().products.bannerImage = ''" class="w-8 h-8 flex items-center justify-center bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors shadow-xl">
-                                       <mat-icon class="!text-sm">delete</mat-icon>
-                                     </button>
-                                   </div>
-                                 }
-                               </div>
-                               <div class="flex-grow w-full space-y-3">
-                                 <div class="flex gap-2">
-                                   <input type="text" [(ngModel)]="websiteData().products.bannerImage" placeholder="Enter remote image URL..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none focus:ring-2 focus:ring-primary/20 transition-all">
-                                   <button mat-flat-button class="!bg-primary !text-white !font-bold !rounded-xl !h-[46px] shrink-0 relative overflow-hidden px-6">
-                                     <span class="flex items-center gap-2 whitespace-nowrap"><mat-icon class="!text-[18px]">upload</mat-icon> Browse</span>
-                                     <input type="file" accept="image/*" (change)="onImageUpload($event, 'website', 0, 'products')" class="absolute inset-0 opacity-0 cursor-pointer">
-                                   </button>
-                                 </div>
-                               </div>
-                             </div>
-                          </div>
-                          
-                          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Landing Title</div>
-                                <input type="text" [(ngModel)]="websiteData().products.headerTitle" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3.5 text-sm font-black text-secondary focus:ring-2 focus:ring-primary/20 outline-none transition-all shadow-sm">
+                            <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                              <mat-icon class="!text-xs !w-auto !h-auto">image</mat-icon> Main Introduction Image
                             </div>
-                            <div>
-                                <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Landing Context / Subtitle</div>
-                                <input type="text" [(ngModel)]="websiteData().products.headerSubtitle" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3.5 text-sm text-slate-600 focus:ring-2 focus:ring-primary/20 outline-none transition-all shadow-sm">
+                            <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                              <div class="relative w-full sm:w-24 aspect-video sm:aspect-square rounded-xl bg-slate-100 dark:bg-slate-900 overflow-hidden shrink-0 shadow-inner group/banner">
+                                <img [src]="websiteData().products.bannerImage" class="w-full h-full object-cover" referrerpolicy="no-referrer" alt="banner preview">
+                                @if (websiteData().products.bannerImage) {
+                                  <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover/banner:opacity-100 transition-opacity">
+                                    <button (click)="websiteData().products.bannerImage = ''" class="w-8 h-8 flex items-center justify-center bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors shadow-xl">
+                                      <mat-icon class="!text-sm">delete</mat-icon>
+                                    </button>
+                                  </div>
+                                }
+                              </div>
+                              <div class="flex-grow w-full space-y-3">
+                                <div class="flex gap-2">
+                                  <input type="text" [(ngModel)]="websiteData().products.bannerImage" placeholder="Enter image URL..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none focus:ring-2 focus:ring-primary/20 transition-all">
+                                  <button mat-flat-button class="!bg-primary !text-white !font-bold !rounded-xl !h-[46px] shrink-0 relative overflow-hidden px-6">
+                                    <span class="flex items-center gap-2 whitespace-nowrap"><mat-icon class="!text-[18px]">upload</mat-icon> Browse</span>
+                                    <input type="file" accept="image/*" (change)="onImageUpload($event, 'website', 0, 'products')" class="absolute inset-0 opacity-0 cursor-pointer">
+                                  </button>
+                                </div>
+                              </div>
                             </div>
                           </div>
+
+                          @if(websiteData().products) {
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <div>
+                                <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1 text-primary">Display Headline</div>
+                                <input type="text" [(ngModel)]="websiteData().products.headerTitle" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-4 text-sm font-black text-secondary outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm">
+                              </div>
+                              <div>
+                                <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Contextual Subheader</div>
+                                <input type="text" [(ngModel)]="websiteData().products.headerSubtitle" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-4 text-sm text-slate-500 outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm">
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+
+              @if (activeWebsiteTab() === 'portfolio') {
+                <div class="flex items-center justify-between mb-8">
+                  <div>
+                    <h3 class="text-xl md:text-2xl font-black text-secondary dark:text-white flex items-center gap-2">
+                       <mat-icon class="text-primary !w-8 !h-8 !text-[32px] leading-[32px]">photo_library</mat-icon> 
+                       Portfolio Configuration
+                    </h3>
+                    <p class="text-slate-800 text-xs mt-1 font-bold uppercase tracking-widest">Projects Management & Case Studies</p>
+                  </div>
+                </div>
+
+                <div class="space-y-6">
+                  <!-- Page Header & Banner Section -->
+                  <div class="group/section bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 overflow-hidden transition-all duration-300 hover:border-primary/20">
+                    <div class="flex items-center justify-between p-6 cursor-pointer select-none" (click)="activeAccordionSection.set(activeAccordionSection() === 'port-banner' ? '' : 'port-banner')" (keydown.enter)="activeAccordionSection.set(activeAccordionSection() === 'port-banner' ? '' : 'port-banner')" tabindex="0" role="button">
+                      <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-primary shadow-sm group-hover/section:scale-110 transition-transform duration-500">
+                           <mat-icon>art_track</mat-icon>
+                        </div>
+                        <div>
+                          <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Banner & Header</h4>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Hero Intro Configuration</p>
+                        </div>
+                      </div>
+                      <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'port-banner'">expand_more</mat-icon>
+                    </div>
+
+                    @if (activeAccordionSection() === 'port-banner') {
+                      <div class="px-6 pb-8 animate-in fade-in slide-in-from-top-4 duration-500">
+                        <div class="h-px bg-slate-200 dark:bg-slate-800 mb-8"></div>
+                        
+                        <div class="space-y-8">
+                          <!-- Banner Image -->
+                          <div>
+                            <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                              <mat-icon class="!text-xs !w-auto !h-auto">image</mat-icon> Main Introduction Image
+                            </div>
+                            <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                              <div class="relative w-full sm:w-24 aspect-video sm:aspect-square rounded-xl bg-slate-100 dark:bg-slate-900 overflow-hidden shrink-0 shadow-inner group/banner">
+                                <img [src]="websiteData().portfolio.bannerImage" class="w-full h-full object-cover" referrerpolicy="no-referrer" alt="banner preview">
+                                @if (websiteData().portfolio.bannerImage) {
+                                  <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover/banner:opacity-100 transition-opacity">
+                                    <button (click)="websiteData().portfolio.bannerImage = ''" class="w-8 h-8 flex items-center justify-center bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors shadow-xl">
+                                      <mat-icon class="!text-sm">delete</mat-icon>
+                                    </button>
+                                  </div>
+                                }
+                              </div>
+                              <div class="flex-grow w-full space-y-3">
+                                <div class="flex gap-2">
+                                  <input type="text" [(ngModel)]="websiteData().portfolio.bannerImage" placeholder="Enter image URL..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none focus:ring-2 focus:ring-primary/20 transition-all">
+                                  <button mat-flat-button class="!bg-primary !text-white !font-bold !rounded-xl !h-[46px] shrink-0 relative overflow-hidden px-6">
+                                    <span class="flex items-center gap-2 whitespace-nowrap"><mat-icon class="!text-[18px]">upload</mat-icon> Browse</span>
+                                    <input type="file" accept="image/*" (change)="onImageUpload($event, 'website', 0, 'portfolio')" class="absolute inset-0 opacity-0 cursor-pointer">
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          @if(websiteData().portfolio) {
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <div>
+                                <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1 text-primary">Display Headline</div>
+                                <input type="text" [(ngModel)]="websiteData().portfolio.headerTitle" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-4 text-sm font-black text-secondary outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm">
+                              </div>
+                              <div>
+                                <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Contextual Subheader</div>
+                                <input type="text" [(ngModel)]="websiteData().portfolio.headerSubtitle" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-4 text-sm text-slate-500 outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-sm">
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Project Case Studies Section -->
+                  <div class="group/section bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 overflow-hidden transition-all duration-300 hover:border-primary/20">
+                    <div class="flex items-center justify-between p-6 cursor-pointer select-none" (click)="activeAccordionSection.set(activeAccordionSection() === 'port-projects' ? '' : 'port-projects')" (keydown.enter)="activeAccordionSection.set(activeAccordionSection() === 'port-projects' ? '' : 'port-projects')" tabindex="0" role="button">
+                      <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-primary shadow-sm group-hover/section:scale-110 transition-transform duration-500">
+                           <mat-icon>task_alt</mat-icon>
+                        </div>
+                        <div>
+                          <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Project Case Studies</h4>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Manage Specific Installations</p>
+                        </div>
+                      </div>
+                      <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'port-projects'">expand_more</mat-icon>
+                    </div>
+
+                        @if (activeAccordionSection() === 'port-projects') {
+                      <div class="px-6 pb-8 animate-in fade-in slide-in-from-top-4 duration-500">
+                        <div class="h-px bg-slate-200 dark:bg-slate-800 mb-8"></div>
+                        
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                          <div>
+                            <h5 class="text-sm font-black text-secondary dark:text-white">Active Case Studies</h5>
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Drag to change display order</p>
+                          </div>
+                          <button mat-flat-button (click)="addHomeProject()" class="!bg-primary !text-white !font-black !px-6 !py-6 !rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] transition-transform">
+                            <mat-icon class="!text-sm">add</mat-icon> Add New Project
+                          </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8" cdkDropList (cdkDropListDropped)="dropProject($event)">
+                          @for (proj of websiteData().home.projects; track $index; let i = $index) {
+                            <div cdkDrag class="bg-white dark:bg-slate-800 p-2 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 relative group/proj shadow-sm hover:shadow-xl transition-all duration-500">
+                              <div class="absolute top-6 right-6 z-30 flex items-center gap-2 transition-opacity translate-y-2 group-hover/proj:translate-y-0 duration-300">
+                                <button mat-icon-button cdkDragHandle class="!bg-white !text-slate-400 cursor-move hover:!text-primary shadow-xl rounded-full sm:opacity-0 sm:group-hover/proj:opacity-100 transition-opacity" title="Drag to reorder">
+                                  <mat-icon>drag_indicator</mat-icon>
+                                </button>
+                                <button mat-icon-button (click)="removeHomeProject(i)" class="!bg-rose-500 !text-white shadow-xl rounded-full hover:!bg-rose-600 sm:opacity-0 sm:group-hover/proj:opacity-100 transition-opacity" title="Delete Project">
+                                  <mat-icon>delete</mat-icon>
+                                </button>
+                              </div>
+
+                              <div class="flex flex-col gap-8 p-4">
+                                <div class="w-full space-y-4">
+                                  <div class="relative group/card rounded-[2rem] overflow-hidden shadow-inner bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 aspect-video">
+                                     @if (websiteData().home.projects[i].image) {
+                                       <img [src]="websiteData().home.projects[i].image" class="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-105" referrerpolicy="no-referrer" alt="project preview">
+                                     } @else {
+                                       <div class="flex flex-col items-center justify-center w-full h-full text-slate-300">
+                                         <mat-icon class="!text-5xl !w-auto !h-auto mb-2">image</mat-icon>
+                                         <span class="text-[10px] font-black uppercase tracking-widest">Main Showcase Missing</span>
+                                       </div>
+                                     }
+                                     
+                                     <!-- Content Overlay -->
+                                     <div class="absolute inset-0 bg-gradient-to-t from-secondary/80 via-transparent to-transparent flex flex-col justify-end p-8 pointer-events-none">
+                                       <div class="bg-primary/90 backdrop-blur-sm self-start px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white mb-2">
+                                          {{websiteData().home.projects[i].systemSize || 'System Size'}}
+                                       </div>
+                                       <h3 class="text-2xl font-black text-white leading-tight">{{websiteData().home.projects[i].title || 'Untitled Project'}}</h3>
+                                     </div>
+
+                                     <!-- Hover Actions Overlay -->
+                                     <div class="absolute inset-0 bg-secondary/60 backdrop-blur-[2px] flex items-center justify-center gap-3 opacity-0 group-hover/card:opacity-100 transition-all duration-300">
+                                       <button (click)="selectedViewImage.set(websiteData().home.projects[i].image)" class="w-12 h-12 bg-white/20 hover:bg-white text-white hover:text-secondary rounded-2xl flex items-center justify-center transition-all shadow-2xl backdrop-blur-md">
+                                         <mat-icon>visibility</mat-icon>
+                                       </button>
+                                       <div class="relative w-12 h-12 bg-primary text-white rounded-2xl flex items-center justify-center shadow-xl hover:scale-110 transition-transform">
+                                         <mat-icon>upload</mat-icon>
+                                         <input type="file" accept="image/*" (change)="onImageUpload($event, 'website', i, 'home-project')" class="absolute inset-0 opacity-0 cursor-pointer">
+                                       </div>
+                                     </div>
+                                  </div>
+                                  
+                                  <div class="space-y-4 px-2">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                      <div class="md:col-span-2">
+                                         <div class="block text-[9px] font-black text-slate-400 uppercase mb-1.5 px-1">Case Study Title</div>
+                                         <input type="text" [(ngModel)]="websiteData().home.projects[i].title" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-3 text-sm font-black text-secondary outline-none focus:ring-1 focus:ring-primary transition-all">
+                                      </div>
+                                      <div>
+                                         <div class="block text-[9px] font-black text-slate-400 uppercase mb-1.5 px-1">Client Name</div>
+                                         <input type="text" [(ngModel)]="websiteData().home.projects[i].client" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none">
+                                      </div>
+                                      <div>
+                                         <div class="block text-[9px] font-black text-slate-400 uppercase mb-1.5 px-1">Location</div>
+                                         <input type="text" [(ngModel)]="websiteData().home.projects[i].location" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none">
+                                      </div>
+                                      <div>
+                                         <div class="block text-[9px] font-black text-slate-400 uppercase mb-1.5 px-1">System Size</div>
+                                         <input type="text" [(ngModel)]="websiteData().home.projects[i].systemSize" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none" placeholder="e.g. 5kWp On-Grid">
+                                      </div>
+                                      <div>
+                                         <div class="block text-[9px] font-black text-slate-400 uppercase mb-1.5 px-1">Completion</div>
+                                         <input type="text" [(ngModel)]="websiteData().home.projects[i].completionDate" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none">
+                                      </div>
+                                      <div class="md:col-span-2">
+                                         <div class="block text-[9px] font-black text-slate-400 uppercase mb-1.5 px-1">Environmental Impact</div>
+                                         <input type="text" [(ngModel)]="websiteData().home.projects[i].energySaved" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-emerald-600 outline-none" placeholder="e.g. 4.2 Tons CO2 Saved/Year">
+                                      </div>
+                                      <div class="md:col-span-2">
+                                         <div class="block text-[9px] font-black text-slate-400 uppercase mb-1.5 px-1">Project Narrative</div>
+                                         <textarea [(ngModel)]="websiteData().home.projects[i].description" rows="4" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-600 outline-none resize-none"></textarea>
+                                      </div>
+                                    </div>
+
+                                    <!-- Gallery Management -->
+                                    <div class="pt-6 border-t border-slate-100 dark:border-slate-800 mt-2">
+                                       <div class="flex items-center justify-between mb-4">
+                                          <div class="flex items-center gap-2">
+                                             <mat-icon class="text-slate-400 !w-4 !h-4 !text-[16px]">collections</mat-icon>
+                                             <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Image Matrix</h4>
+                                          </div>
+                                          <button (click)="addHomeProjectGalleryImage(i)" class="text-[9px] font-black text-primary hover:bg-primary/5 px-2 py-1 rounded-lg uppercase tracking-widest border border-primary/20 transition-all">Add Slide</button>
+                                       </div>
+                                       <div class="flex flex-wrap gap-3">
+                                          @for (gImg of proj.gallery; track $index; let gIdx = $index) {
+                                            <div class="relative group/gal w-12 h-12 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm">
+                                               @if (gImg) {
+                                                 <img [src]="gImg" class="w-full h-full object-cover" alt="Gallery preview mini">
+                                               } @else {
+                                                 <div class="w-full h-full flex items-center justify-center text-slate-300">
+                                                    <mat-icon class="!text-sm">landscape</mat-icon>
+                                                 </div>
+                                               }
+                                               <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/gal:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                                                  <div class="relative w-5 h-5 bg-white text-secondary rounded flex items-center justify-center hover:scale-110 transition-transform">
+                                                     <mat-icon class="!text-[10px] !w-auto !h-auto">upload</mat-icon>
+                                                     <input type="file" (change)="onImageUpload($event, 'website', i, 'home-project-gallery', gIdx)" class="absolute inset-0 opacity-0 cursor-pointer">
+                                                  </div>
+                                                  <button (click)="removeHomeProjectGalleryImage(i, gIdx)" class="w-5 h-5 bg-rose-500 text-white rounded flex items-center justify-center hover:scale-110 transition-transform">
+                                                     <mat-icon class="!text-[10px] !w-auto !h-auto">delete</mat-icon>
+                                                  </button>
+                                               </div>
+                                            </div>
+                                          }
+                                       </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          }
                         </div>
                       </div>
                     }
@@ -2786,7 +2759,7 @@ interface ServiceJob {
                         </div>
                         <div>
                           <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Brand Identity</h4>
-                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Logo URL & Company Brief</p>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Logo & Company Brief</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'foot-brand'">expand_more</mat-icon>
@@ -2798,22 +2771,24 @@ interface ServiceJob {
                         <div class="space-y-8">
                           <div>
                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                               <mat-icon class="!text-xs !w-auto !h-auto text-primary">token</mat-icon> Secondary Footer Logo
+                               <mat-icon class="!text-xs !w-auto !h-auto text-primary">token</mat-icon> Footer Brand Logo
                              </div>
                              <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
                                <div class="relative w-full sm:w-24 aspect-square rounded-xl bg-slate-100 dark:bg-slate-900 overflow-hidden shrink-0 shadow-inner group/banner flex items-center justify-center">
-                                 <img [src]="websiteData().footer.bannerImage" class="max-w-[70%] max-h-[70%] object-contain" referrerpolicy="no-referrer" alt="footer logo preview">
                                  @if (websiteData().footer.bannerImage) {
+                                   <img [src]="websiteData().footer.bannerImage" class="max-w-[80%] max-h-[80%] object-contain" referrerpolicy="no-referrer" alt="footer logo preview">
                                    <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover/banner:opacity-100 transition-opacity">
                                      <button (click)="websiteData().footer.bannerImage = ''" class="w-8 h-8 flex items-center justify-center bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors shadow-xl">
                                        <mat-icon class="!text-sm">delete</mat-icon>
                                      </button>
                                    </div>
+                                 } @else {
+                                   <mat-icon class="!text-4xl text-slate-200">photo</mat-icon>
                                  }
                                </div>
                                <div class="flex-grow w-full space-y-3">
                                  <div class="flex gap-2">
-                                   <input type="text" [(ngModel)]="websiteData().footer.bannerImage" placeholder="Enter remote URL..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none focus:ring-2 focus:ring-primary/20 transition-all">
+                                   <input type="text" [(ngModel)]="websiteData().footer.bannerImage" placeholder="Logo image URL..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none focus:ring-2 focus:ring-primary/20 transition-all">
                                    <button mat-flat-button class="!bg-primary !text-white !font-bold !rounded-xl !h-[46px] shrink-0 relative overflow-hidden px-6">
                                      <span class="flex items-center gap-2 whitespace-nowrap"><mat-icon class="!text-[18px]">upload</mat-icon> Browse</span>
                                      <input type="file" accept="image/*" (change)="onImageUpload($event, 'website', 0, 'footer')" class="absolute inset-0 opacity-0 cursor-pointer">
@@ -2822,52 +2797,35 @@ interface ServiceJob {
                                </div>
                              </div>
                           </div>
-                          <div>
-                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Elevator Pitch / Brief Description</div>
-                              <textarea [(ngModel)]="websiteData().footer.description" rows="4" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4 text-sm text-slate-600 outline-none shadow-sm resize-none focus:ring-2 focus:ring-primary/20 transition-all"></textarea>
+
+                          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-1.5">
+                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Support Phone</div>
+                              <input [(ngModel)]="websiteData().footer.phone" type="text" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none shadow-sm h-12">
+                            </div>
+                            <div class="space-y-1.5">
+                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Inquiry Email</div>
+                              <input [(ngModel)]="websiteData().footer.email" type="text" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none shadow-sm h-12">
+                            </div>
+                            <div class="md:col-span-2 space-y-1.5">
+                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Office Headquarters</div>
+                              <input [(ngModel)]="websiteData().footer.address" type="text" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none shadow-sm h-12">
+                            </div>
+                            <div class="md:col-span-2 space-y-1.5">
+                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Company Narrative</div>
+                              <textarea [(ngModel)]="websiteData().footer.description" rows="3" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4 text-sm text-slate-600 outline-none shadow-sm focus:ring-2 focus:ring-primary/10 transition-all resize-none"></textarea>
+                            </div>
+                            <div class="md:col-span-2 space-y-1.5">
+                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Copyright Credits</div>
+                              <input [(ngModel)]="websiteData().footer.copyright" type="text" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none shadow-sm h-12">
+                            </div>
                           </div>
                         </div>
                       </div>
                     }
                   </div>
 
-                  <!-- Quick Contact Section -->
-                  <div class="group/section bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 overflow-hidden transition-all duration-300 hover:border-primary/20">
-                    <div class="flex items-center justify-between p-6 cursor-pointer select-none" (click)="activeAccordionSection.set(activeAccordionSection() === 'foot-contact' ? '' : 'foot-contact')" (keydown.enter)="activeAccordionSection.set(activeAccordionSection() === 'foot-contact' ? '' : 'foot-contact')" tabindex="0" role="button">
-                      <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-primary shadow-sm group-hover/section:scale-110 transition-transform duration-500">
-                           <mat-icon>import_contacts</mat-icon>
-                        </div>
-                        <div>
-                          <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Quick Contact</h4>
-                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Footer-Specific Address & Phone</p>
-                        </div>
-                      </div>
-                      <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'foot-contact'">expand_more</mat-icon>
-                    </div>
-
-                    @if (activeAccordionSection() === 'foot-contact') {
-                      <div class="px-6 pb-8 animate-in fade-in slide-in-from-top-4 duration-500">
-                        <div class="h-px bg-slate-200 dark:bg-slate-800 mb-8"></div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                          <div>
-                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1 flex items-center gap-2">
-                                <mat-icon class="!text-sm text-primary">place</mat-icon> Simplified Address
-                              </div>
-                              <input type="text" [(ngModel)]="websiteData().footer.address" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4 text-sm font-black text-secondary outline-none shadow-sm focus:ring-2 focus:ring-primary/20 transition-all">
-                          </div>
-                          <div>
-                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1 flex items-center gap-2">
-                                <mat-icon class="!text-sm text-primary">phone</mat-icon> Contact Identifier
-                              </div>
-                              <input type="text" [(ngModel)]="websiteData().footer.phone" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4 text-sm font-black text-secondary outline-none shadow-sm focus:ring-2 focus:ring-primary/20 transition-all">
-                          </div>
-                        </div>
-                      </div>
-                    }
-                  </div>
-
-                  <!-- Schedule & Legal Section -->
+                  <!-- Legal Policies Section -->
                   <div class="group/section bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 overflow-hidden transition-all duration-300 hover:border-primary/20">
                     <div class="flex items-center justify-between p-6 cursor-pointer select-none" (click)="activeAccordionSection.set(activeAccordionSection() === 'foot-legal' ? '' : 'foot-legal')" (keydown.enter)="activeAccordionSection.set(activeAccordionSection() === 'foot-legal' ? '' : 'foot-legal')" tabindex="0" role="button">
                       <div class="flex items-center gap-4">
@@ -2875,8 +2833,8 @@ interface ServiceJob {
                            <mat-icon>gavel</mat-icon>
                         </div>
                         <div>
-                          <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Hours & Legal</h4>
-                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Schedule & Copyright Narrative</p>
+                          <h4 class="text-lg font-black text-secondary dark:text-white leading-tight">Legal Policies</h4>
+                          <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest mt-1">Privacy, Terms, Disclaimer & Cookies</p>
                         </div>
                       </div>
                       <mat-icon class="text-slate-300 transition-transform duration-500" [class.rotate-180]="activeAccordionSection() === 'foot-legal'">expand_more</mat-icon>
@@ -2885,18 +2843,243 @@ interface ServiceJob {
                     @if (activeAccordionSection() === 'foot-legal') {
                       <div class="px-6 pb-8 animate-in fade-in slide-in-from-top-4 duration-500">
                         <div class="h-px bg-slate-200 dark:bg-slate-800 mb-8"></div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-6">
                           <div>
-                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Compact Operations Schedule</div>
-                              <input type="text" [(ngModel)]="websiteData().footer.schedule" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4 text-sm text-slate-600 outline-none shadow-sm focus:ring-2 focus:ring-primary/20 transition-all" placeholder="e.g. 08:00 - 18:00 MON-SUN">
+                            <div class="flex items-center justify-between mb-2">
+                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Privacy Policy</div>
+                              <div class="flex items-center gap-4">
+                                <div class="flex items-center gap-2">
+                                  <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Font:</span>
+                                  <select [(ngModel)]="websiteData().footer.privacyFontFamily" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-[10px] text-slate-600 outline-none shadow-sm">
+                                    <option value="Arial">Arial</option>
+                                    <option value="Inter">Inter</option>
+                                    <option value="Helvetica">Helvetica</option>
+                                    <option value="Times New Roman">Times New Roman</option>
+                                    <option value="Georgia">Georgia</option>
+                                  </select>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                  <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Size:</span>
+                                  <input type="text" [(ngModel)]="websiteData().footer.privacyFontSize" placeholder="e.g. 14px" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-[10px] text-slate-600 outline-none w-16 shadow-sm">
+                                </div>
+                                <div class="flex items-center gap-2">
+                                  <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Update:</span>
+                                  <input type="text" [(ngModel)]="websiteData().footer.privacyLastUpdated" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-[10px] text-slate-600 outline-none w-24 shadow-sm">
+                                </div>
+                                <button (click)="previewPolicy('privacy')" class="flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary rounded-lg text-[10px] font-bold uppercase tracking-wider hover:bg-primary/20 transition-all">
+                                  <mat-icon class="!text-[14px] !w-[14px] !h-[14px]">visibility</mat-icon> Preview
+                                </button>
+                              </div>
+                            </div>
+                            <textarea [(ngModel)]="websiteData().footer.privacyPolicy" rows="4" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4 text-sm text-slate-600 outline-none shadow-sm focus:ring-2 focus:ring-primary/10 transition-all resize-none"></textarea>
                           </div>
                           <div>
-                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Copyright Signature</div>
-                              <input type="text" [(ngModel)]="websiteData().footer.copyright" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4 text-sm text-slate-400 outline-none shadow-sm focus:ring-2 focus:ring-primary/20 transition-all">
+                            <div class="flex items-center justify-between mb-2">
+                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Terms of Service</div>
+                              <div class="flex items-center gap-4">
+                                <div class="flex items-center gap-2">
+                                  <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Font:</span>
+                                  <select [(ngModel)]="websiteData().footer.termsFontFamily" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-[10px] text-slate-600 outline-none shadow-sm">
+                                    <option value="Arial">Arial</option>
+                                    <option value="Inter">Inter</option>
+                                    <option value="Helvetica">Helvetica</option>
+                                    <option value="Times New Roman">Times New Roman</option>
+                                    <option value="Georgia">Georgia</option>
+                                  </select>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                  <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Size:</span>
+                                  <input type="text" [(ngModel)]="websiteData().footer.termsFontSize" placeholder="e.g. 14px" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-[10px] text-slate-600 outline-none w-16 shadow-sm">
+                                </div>
+                                <div class="flex items-center gap-2">
+                                  <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Update:</span>
+                                  <input type="text" [(ngModel)]="websiteData().footer.termsLastUpdated" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-[10px] text-slate-600 outline-none w-24 shadow-sm">
+                                </div>
+                                <button (click)="previewPolicy('terms')" class="flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary rounded-lg text-[10px] font-bold uppercase tracking-wider hover:bg-primary/20 transition-all">
+                                  <mat-icon class="!text-[14px] !w-[14px] !h-[14px]">visibility</mat-icon> Preview
+                                </button>
+                              </div>
+                            </div>
+                            <textarea [(ngModel)]="websiteData().footer.termsOfService" rows="4" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4 text-sm text-slate-600 outline-none shadow-sm focus:ring-2 focus:ring-primary/10 transition-all resize-none"></textarea>
+                          </div>
+                          <div>
+                            <div class="flex items-center justify-between mb-2">
+                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Disclaimers</div>
+                              <div class="flex items-center gap-4">
+                                <div class="flex items-center gap-2">
+                                  <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Font:</span>
+                                  <select [(ngModel)]="websiteData().footer.disclaimerFontFamily" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-[10px] text-slate-600 outline-none shadow-sm">
+                                    <option value="Arial">Arial</option>
+                                    <option value="Inter">Inter</option>
+                                    <option value="Helvetica">Helvetica</option>
+                                    <option value="Times New Roman">Times New Roman</option>
+                                    <option value="Georgia">Georgia</option>
+                                  </select>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                  <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Size:</span>
+                                  <input type="text" [(ngModel)]="websiteData().footer.disclaimerFontSize" placeholder="e.g. 14px" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-[10px] text-slate-600 outline-none w-16 shadow-sm">
+                                </div>
+                                <div class="flex items-center gap-2">
+                                  <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Update:</span>
+                                  <input type="text" [(ngModel)]="websiteData().footer.disclaimerLastUpdated" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-[10px] text-slate-600 outline-none w-24 shadow-sm">
+                                </div>
+                                <button (click)="previewPolicy('disclaimer')" class="flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary rounded-lg text-[10px] font-bold uppercase tracking-wider hover:bg-primary/20 transition-all">
+                                  <mat-icon class="!text-[14px] !w-[14px] !h-[14px]">visibility</mat-icon> Preview
+                                </button>
+                              </div>
+                            </div>
+                            <textarea [(ngModel)]="websiteData().footer.disclaimer" rows="4" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4 text-sm text-slate-600 outline-none shadow-sm focus:ring-2 focus:ring-primary/10 transition-all resize-none"></textarea>
+                          </div>
+                          <div>
+                            <div class="flex items-center justify-between mb-2">
+                              <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Cookie Policy</div>
+                              <div class="flex items-center gap-4">
+                                <div class="flex items-center gap-2">
+                                  <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Font:</span>
+                                  <select [(ngModel)]="websiteData().footer.cookieFontFamily" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-[10px] text-slate-600 outline-none shadow-sm">
+                                    <option value="Arial">Arial</option>
+                                    <option value="Inter">Inter</option>
+                                    <option value="Helvetica">Helvetica</option>
+                                    <option value="Times New Roman">Times New Roman</option>
+                                    <option value="Georgia">Georgia</option>
+                                  </select>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                  <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Size:</span>
+                                  <input type="text" [(ngModel)]="websiteData().footer.cookieFontSize" placeholder="e.g. 14px" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-[10px] text-slate-600 outline-none w-16 shadow-sm">
+                                </div>
+                                <div class="flex items-center gap-2">
+                                  <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Update:</span>
+                                  <input type="text" [(ngModel)]="websiteData().footer.cookieLastUpdated" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-[10px] text-slate-600 outline-none w-24 shadow-sm">
+                                </div>
+                                <button (click)="previewPolicy('cookie')" class="flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary rounded-lg text-[10px] font-bold uppercase tracking-wider hover:bg-primary/20 transition-all">
+                                  <mat-icon class="!text-[14px] !w-[14px] !h-[14px]">visibility</mat-icon> Preview
+                                </button>
+                              </div>
+                            </div>
+                            <textarea [(ngModel)]="websiteData().footer.cookiePolicy" rows="4" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-4 text-sm text-slate-600 outline-none shadow-sm focus:ring-2 focus:ring-primary/10 transition-all resize-none"></textarea>
                           </div>
                         </div>
                       </div>
                     }
+                  </div>
+                </div>
+              }
+
+              @if (activeWebsiteTab() === 'system') {
+                <div class="flex items-center justify-between mb-8">
+                  <div>
+                    <h3 class="text-xl md:text-2xl font-black text-secondary dark:text-white flex items-center gap-2">
+                       <mat-icon class="text-primary !w-8 !h-8 !text-[32px] leading-[32px]">settings_system_daydream</mat-icon> 
+                       System Configuration
+                    </h3>
+                    <p class="text-slate-800 text-xs mt-1 font-bold uppercase tracking-widest">Global Colors & Typography</p>
+                  </div>
+                </div>
+
+                <div class="space-y-6">
+                  <!-- Typography Section -->
+                  <div class="bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] border border-slate-100 dark:border-slate-800 p-6 sm:p-8">
+                    <h4 class="text-lg font-black text-secondary dark:text-white leading-tight mb-6 flex items-center gap-2"><mat-icon>text_format</mat-icon> Typography Formats</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div>
+                        <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">H1 Font Family</div>
+                        <select [(ngModel)]="websiteData().system.typography.h1Family" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none focus:ring-2 focus:ring-primary/20">
+                          <option value="Inter">Inter</option>
+                          <option value="Arial">Arial</option>
+                          <option value="Helvetica">Helvetica</option>
+                          <option value="Times New Roman">Times New Roman</option>
+                          <option value="Georgia">Georgia</option>
+                        </select>
+                      </div>
+                      <div>
+                        <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">H2 Font Family</div>
+                        <select [(ngModel)]="websiteData().system.typography.h2Family" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none focus:ring-2 focus:ring-primary/20">
+                          <option value="Inter">Inter</option>
+                          <option value="Arial">Arial</option>
+                          <option value="Helvetica">Helvetica</option>
+                          <option value="Times New Roman">Times New Roman</option>
+                          <option value="Georgia">Georgia</option>
+                        </select>
+                      </div>
+                      <div>
+                        <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">H3 Font Family</div>
+                        <select [(ngModel)]="websiteData().system.typography.h3Family" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none focus:ring-2 focus:ring-primary/20">
+                          <option value="Inter">Inter</option>
+                          <option value="Arial">Arial</option>
+                          <option value="Helvetica">Helvetica</option>
+                          <option value="Times New Roman">Times New Roman</option>
+                          <option value="Georgia">Georgia</option>
+                        </select>
+                      </div>
+                      <div>
+                        <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">H4 Font Family</div>
+                        <select [(ngModel)]="websiteData().system.typography.h4Family" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none focus:ring-2 focus:ring-primary/20">
+                          <option value="Inter">Inter</option>
+                          <option value="Arial">Arial</option>
+                          <option value="Helvetica">Helvetica</option>
+                          <option value="Times New Roman">Times New Roman</option>
+                          <option value="Georgia">Georgia</option>
+                        </select>
+                      </div>
+                      <div>
+                        <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Body Font Family</div>
+                        <select [(ngModel)]="websiteData().system.typography.bodyFamily" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none focus:ring-2 focus:ring-primary/20">
+                          <option value="Inter">Inter</option>
+                          <option value="Arial">Arial</option>
+                          <option value="Helvetica">Helvetica</option>
+                          <option value="Times New Roman">Times New Roman</option>
+                          <option value="Georgia">Georgia</option>
+                        </select>
+                      </div>
+                      <div>
+                        <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Base Font Size</div>
+                        <input type="text" [(ngModel)]="websiteData().system.typography.baseFontSize" placeholder="e.g. 16px" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none focus:ring-2 focus:ring-primary/20">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Colors Section -->
+                  <div class="bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] border border-slate-100 dark:border-slate-800 p-6 sm:p-8">
+                    <h4 class="text-lg font-black text-secondary dark:text-white leading-tight mb-6 flex items-center gap-2"><mat-icon>palette</mat-icon> Layout Background Colors</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div>
+                        <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Body Background</div>
+                        <div class="flex items-center gap-3">
+                          <input type="color" [(ngModel)]="websiteData().system.colors.bodyBackground" class="w-12 h-12 rounded-xl cursor-pointer border border-slate-200 p-0 block bg-white">
+                          <input type="text" [(ngModel)]="websiteData().system.colors.bodyBackground" class="flex-grow bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none focus:ring-2 focus:ring-primary/20 min-w-0" placeholder="#ffffff">
+                        </div>
+                      </div>
+                      <div>
+                        <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Primary Button</div>
+                        <div class="flex items-center gap-3">
+                          <input type="color" [(ngModel)]="websiteData().system.colors.buttonBackground" class="w-12 h-12 rounded-xl cursor-pointer border border-slate-200 p-0 block bg-white">
+                          <input type="text" [(ngModel)]="websiteData().system.colors.buttonBackground" class="flex-grow bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none focus:ring-2 focus:ring-primary/20 min-w-0" placeholder="#00adef">
+                        </div>
+                      </div>
+                      <div>
+                        <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Header Background</div>
+                        <div class="flex items-center gap-3">
+                          <input type="color" [(ngModel)]="websiteData().system.colors.headerBackground" class="w-12 h-12 rounded-xl cursor-pointer border border-slate-200 p-0 block bg-white">
+                          <input type="text" [(ngModel)]="websiteData().system.colors.headerBackground" class="flex-grow bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none focus:ring-2 focus:ring-primary/20 min-w-0" placeholder="#ffffff">
+                        </div>
+                      </div>
+                      <div>
+                        <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Navbar Background</div>
+                        <div class="flex items-center gap-3">
+                          <input type="color" [(ngModel)]="websiteData().system.colors.navbarBackground" class="w-12 h-12 rounded-xl cursor-pointer border border-slate-200 p-0 block bg-white">
+                          <input type="text" [(ngModel)]="websiteData().system.colors.navbarBackground" class="flex-grow bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none focus:ring-2 focus:ring-primary/20 min-w-0" placeholder="#ffffff">
+                        </div>
+                      </div>
+                      <div>
+                        <div class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Footer Background</div>
+                        <div class="flex items-center gap-3">
+                          <input type="color" [(ngModel)]="websiteData().system.colors.footerBackground" class="w-12 h-12 rounded-xl cursor-pointer border border-slate-200 p-0 block bg-white">
+                          <input type="text" [(ngModel)]="websiteData().system.colors.footerBackground" class="flex-grow bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-secondary outline-none focus:ring-2 focus:ring-primary/20 min-w-0" placeholder="#0f172a">
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               }
@@ -3584,6 +3767,54 @@ interface ServiceJob {
         </div>
       }
 
+      <!-- Policy Preview Modal -->
+      @if (activePreviewPolicy()) {
+        <div class="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6 text-left">
+          <div role="button" tabindex="0" (keydown.enter)="activePreviewPolicy.set(null)" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" (click)="activePreviewPolicy.set(null)"></div>
+          
+          <div class="bg-white rounded-[2rem] shadow-2xl relative w-full lg:max-w-3xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div class="flex items-center justify-between p-6 border-b border-slate-100 bg-white">
+              <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                   <mat-icon>visibility</mat-icon>
+                </div>
+                <div>
+                  <h3 class="text-xl font-bold text-secondary leading-tight uppercase tracking-tight">Legal Policy Preview</h3>
+                  <p class="text-xs font-bold text-slate-800 uppercase tracking-widest">{{ activePreviewPolicy() }} Policy Reflection</p>
+                </div>
+              </div>
+              <button (click)="activePreviewPolicy.set(null)" class="w-10 h-10 rounded-full hover:bg-slate-50 flex items-center justify-center text-slate-400 transition-colors">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+            
+            <div class="p-10 overflow-y-auto bg-white text-slate-600">
+              <div class="space-y-8">
+                <div>
+                  <p class="font-black text-secondary mb-8">Last Updated: {{ previewContent().lastUpdated }}</p>
+                  
+                  <div class="space-y-6 leading-relaxed" [style.font-family]="previewContent().fontFamily" [style.font-size]="previewContent().fontSize">
+                    @for (paragraph of previewContent().paragraphs; track paragraph) {
+                      @if (isHeader(paragraph)) {
+                        <h4 class="font-black text-secondary uppercase tracking-tight text-sm mt-8 mb-2">
+                          {{ paragraph }}
+                        </h4>
+                      } @else {
+                        <p class="text-slate-500">{{ paragraph }}</p>
+                      }
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="p-6 border-t border-slate-100 bg-slate-50 flex justify-end">
+              <button (click)="activePreviewPolicy.set(null)" class="px-8 py-3 bg-secondary text-white rounded-2xl font-bold hover:bg-primary transition-all shadow-lg shadow-secondary/20">Close Preview</button>
+            </div>
+          </div>
+        </div>
+      }
+
       <!-- Notification Toast -->
       <div 
         class="fixed top-4 left-1/2 -translate-x-1/2 z-[200] transition-all duration-500 px-6 py-3 rounded-full shadow-2xl flex items-center gap-3"
@@ -3624,6 +3855,9 @@ interface ServiceJob {
     </div>
   `,
   styles: [`
+    h1, h2, h3, h4 {
+      font-family: Arial, Helvetica, sans-serif !important;
+    }
     ::-webkit-scrollbar {
       width: 6px;
     }
@@ -3642,13 +3876,15 @@ interface ServiceJob {
 export class AdminDashboard implements AfterViewInit, OnInit {
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
+  private websiteService = inject(WebsiteDataService);
 
   isRightSidebarOpen = signal(false);
   isDarkMode = signal(false);
   showNotificationsModal = signal(false);
+  showHowItWorks = signal(false);
   activeSection = signal<'dashboard'|'services'|'products'|'jobs'|'website'|'profile'|'settings'|'inquiries'>('dashboard');
 
-  activeWebsiteTab = signal<'home'|'services'|'products'|'about'|'contact'|'faq'|'footer'>('home');
+  activeWebsiteTab = signal<'home'|'services'|'products'|'about'|'contact'|'faq'|'footer'|'portfolio'|'system'>('home');
   selectedServiceDetailId = signal<string>('solar-installation');
 
   newInquiriesCount = computed(() => this.adminInquiries().filter(i => i.status === 'new').length);
@@ -3727,9 +3963,9 @@ export class AdminDashboard implements AfterViewInit, OnInit {
     home: {
       heroTitle: 'Power Your Future with Clean Solar Energy',
       heroSubtitle: 'Blucid Enterprise Inc. provides professional solar system installations, high-quality panels, and complete electrical setups for residential and commercial properties in Laguna.',
-      bannerImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVgh9oWfrFuDp4RP4of2ukqm1hC_xupXkvpA&s',
+      bannerImage: 'assets/images/regenerated_image_1777756664557.png',
       heroImages: [
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVgh9oWfrFuDp4RP4of2ukqm1hC_xupXkvpA&s',
+        'assets/images/regenerated_image_1777756664557.png',
         'https://images.unsplash.com/photo-1509391366360-fe5bb65830bb?q=80&w=2070&auto=format&fit=crop',
         'https://images.unsplash.com/photo-1613665813446-82a78c468a1d?q=80&w=2070&auto=format&fit=crop'
       ],
@@ -3750,7 +3986,7 @@ export class AdminDashboard implements AfterViewInit, OnInit {
         { name: 'Brand 13', icon: '', img: '/img/logo/Picture13.png' },
         { name: 'Brand 14', icon: '', img: '/img/logo/Picture14.png' }
       ],
-      featuresTitle: 'Why Choose Blucid?',
+      featuresTitle: 'Why Choose Us?',
       featuresSubtitle: 'We don\'t just install panels; we build long-term energy independence for our clients with premium hardware and expert engineering.',
       features: [
          { title: 'Expert Installation', desc: 'Our certified engineers ensure every panel and wire is perfectly placed for maximum efficiency and safety.', icon: 'engineering' },
@@ -3788,7 +4024,7 @@ export class AdminDashboard implements AfterViewInit, OnInit {
       ],
       videoUrl: 'https://youbite-medical.web.app/blucid.mp4',
       testimonialsTitle: 'Testimonials',
-      testimonialsSubtitle: 'What our clients say about Blucid',
+      testimonialsSubtitle: 'What our clients say about us',
       testimonials: [
         {
           name: 'Roberto Santos',
@@ -3811,7 +4047,16 @@ export class AdminDashboard implements AfterViewInit, OnInit {
       ],
       ctaTitle: 'Ready to switch to solar?',
       ctaSubtitle: 'Join hundreds of satisfied customers in Laguna who are saving thousands on their electricity bills.',
-      ctaButtonText: 'Start Your Journey'
+      ctaButtonText: 'Start Your Journey',
+      theme: {
+        primaryColor: '#00adef',
+        fontFamily: 'Inter'
+      }
+    },
+    portfolio: {
+      headerTitle: 'Our Portfolio',
+      headerSubtitle: 'Explore our successful engineering projects, solar installations, and electrical solutions across the Philippines.',
+      bannerImage: 'https://images.unsplash.com/photo-1509391366360-fe5bb65830bb?q=80&w=2070&auto=format&fit=crop',
     },
     services: {
       headerTitle: 'Our Services',
@@ -4077,7 +4322,13 @@ export class AdminDashboard implements AfterViewInit, OnInit {
     this.showNotification('Expertise item added. Now fill in details.');
   }
 
-  addServiceBenefit() {
+  moveServiceDetailUp(index: number) {
+    if (index > 0) {
+      // Logic for moving within the list
+    }
+  }
+
+  addServiceDetailBenefit() {
     this.websiteData.update(data => {
       const id = this.selectedServiceDetailId();
       if (!data.services.serviceDetails[id].benefits) data.services.serviceDetails[id].benefits = [];
@@ -4086,7 +4337,7 @@ export class AdminDashboard implements AfterViewInit, OnInit {
     });
   }
 
-  removeServiceBenefit(index: number) {
+  removeServiceDetailBenefit(index: number) {
     if(confirm('Delete this benefit?')) {
       this.websiteData.update(data => {
         data.services.serviceDetails[this.selectedServiceDetailId()].benefits.splice(index, 1);
@@ -4095,7 +4346,7 @@ export class AdminDashboard implements AfterViewInit, OnInit {
     }
   }
 
-  addDetailProcess() {
+  addServiceDetailStep() {
     this.websiteData.update(data => {
       const id = this.selectedServiceDetailId();
       if (!data.services.serviceDetails[id].process) data.services.serviceDetails[id].process = [];
@@ -4104,7 +4355,7 @@ export class AdminDashboard implements AfterViewInit, OnInit {
     });
   }
 
-  removeDetailProcess(index: number) {
+  removeServiceDetailStep(index: number) {
     if(confirm('Delete this process step?')) {
       this.websiteData.update(data => {
         data.services.serviceDetails[this.selectedServiceDetailId()].process.splice(index, 1);
@@ -4113,7 +4364,7 @@ export class AdminDashboard implements AfterViewInit, OnInit {
     }
   }
 
-  addServiceFaq() {
+  addServiceDetailFAQ() {
     this.websiteData.update(data => {
       const id = this.selectedServiceDetailId();
       if (!data.services.serviceDetails[id].faqs) data.services.serviceDetails[id].faqs = [];
@@ -4122,7 +4373,7 @@ export class AdminDashboard implements AfterViewInit, OnInit {
     });
   }
 
-  removeServiceFaq(index: number) {
+  removeServiceDetailFAQ(index: number) {
     if(confirm('Delete this FAQ?')) {
       this.websiteData.update(data => {
         data.services.serviceDetails[this.selectedServiceDetailId()].faqs.splice(index, 1);
@@ -4316,12 +4567,14 @@ export class AdminDashboard implements AfterViewInit, OnInit {
   deleteAdminProject() {
     const project = this.selectedAdminProject();
     if (project && project.id) {
-      if (confirm(`Are you sure you want to delete the project for ${project.client}?`)) {
+      if (confirm(`Are you sure you want to delete the project for "${project.client}"? This action is irreversible and will remove all project data from the records.`)) {
         this.adminDashboardProjects.update(projs => projs.filter(p => p.id !== project.id));
         this.addSystemNotification('Project Records Purged', `Record for ${project.client} was deleted.`, 'delete_forever', 'bg-rose-100 text-rose-600');
         this.selectedAdminProject.set(null);
-        this.showNotification('Project successfully deleted');
+        this.showNotification('Project successfully deleted!');
       }
+    } else {
+      this.selectedAdminProject.set(null);
     }
   }
 
@@ -4354,10 +4607,10 @@ export class AdminDashboard implements AfterViewInit, OnInit {
   }
 
   deleteInquiry(inquiry: Inquiry) {
-    if (confirm('Are you sure you want to delete this inquiry?')) {
+    if (confirm(`Are you sure you want to delete the inquiry from "${inquiry.customerName}"? This action cannot be undone.`)) {
       this.adminInquiries.update(list => list.filter(i => i.id !== inquiry.id));
       this.saveInquiries();
-      this.showNotification('Inquiry deleted successfully');
+      this.showNotification('Inquiry successfully deleted!');
     }
   }
 
@@ -4375,14 +4628,31 @@ export class AdminDashboard implements AfterViewInit, OnInit {
      }
   }
 
-  saveWebsiteContent() {
+  async saveWebsiteContent() {
     if (isPlatformBrowser(this.platformId)) {
+       // Save to local cache
        localStorage.setItem('blucid_website_content', JSON.stringify(this.websiteData()));
        localStorage.setItem('blucid_website_draft', JSON.stringify(this.websiteData()));
        localStorage.setItem('blucid_services', JSON.stringify(this.adminServices()));
        localStorage.setItem('blucid_products', JSON.stringify(this.adminProducts()));
+
+       // Update the service signal so other pages react immediately
+       this.websiteService.saveData(this.websiteData());
+
+       // Sync to Supabase
+       const isSupabaseConfigured = typeof SUPABASE_URL !== 'undefined' && SUPABASE_URL !== '';
+       if (isSupabaseConfigured) {
+          this.addSystemNotification('Cloud Sync', 'Syncing your changes to the live database...', 'sync', 'bg-blue-100 text-blue-600');
+          const success = await saveWebsiteConfig(this.websiteData());
+          if (success) {
+             this.addSystemNotification('Website Published', 'Changes are now live on Supabase Storage and Database.', 'publish', 'bg-emerald-100 text-emerald-600');
+          } else {
+             this.addSystemNotification('Cloud Error', 'Failed to sync to database, but changes saved locally.', 'error', 'bg-rose-100 text-rose-600');
+          }
+       } else {
+          this.addSystemNotification('Website Published', 'Current website contents have been saved locally.', 'publish', 'bg-blue-100 text-blue-600');
+       }
     }
-    this.addSystemNotification('Website Published', 'Current website contents and configurations have been published live.', 'publish', 'bg-blue-100 text-blue-600');
     this.showNotification('Website settings successfully saved!');
   }
 
@@ -4395,36 +4665,19 @@ export class AdminDashboard implements AfterViewInit, OnInit {
     }
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
       const theme = localStorage.getItem('theme');
-      if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      if (theme === 'dark') {
         this.isDarkMode.set(true);
         document.documentElement.classList.add('dark');
       } else {
+        this.isDarkMode.set(false);
         document.documentElement.classList.remove('dark');
       }
 
-      const savedData = localStorage.getItem('blucid_website_content');
-      if (savedData) {
-         try {
-           const parsed = JSON.parse(savedData);
-           this.websiteData.update(current => ({
-             ...current,
-             ...parsed,
-             home: {
-                 ...current.home,
-                 ...(parsed.home || {}),
-                 projects: parsed.home?.projects || current.home.projects,
-                 portfolioTitle: parsed.home?.portfolioTitle || current.home.portfolioTitle,
-                 projectsTitle: parsed.home?.projectsTitle || current.home.projectsTitle,
-                 projectsSubtitle: parsed.home?.projectsSubtitle || current.home.projectsSubtitle
-             },
-             typography: parsed.typography || current.typography,
-             theme: parsed.theme || current.theme
-           }));
-         } catch { /* ignore */ }
-      }
+      // Initial data logic handled by WebsiteDataService
+      this.websiteData.set(this.websiteService.data());
 
       const savedProfile = localStorage.getItem('blucid_admin_profile');
       if (savedProfile) {
@@ -4773,13 +5026,24 @@ export class AdminDashboard implements AfterViewInit, OnInit {
       icon: 'star',
       image: '',
       description: '',
-      features: []
+      features: [],
+      longDescription: '',
+      benefits: [],
+      process: [],
+      faqs: []
     });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   editService(srv: any) {
-    this.selectedService.set(JSON.parse(JSON.stringify(srv)));
+    // Ensure all fields exist
+    const defaultService = {
+      longDescription: '',
+      benefits: srv.benefits || [],
+      process: srv.process || [],
+      faqs: srv.faqs || []
+    };
+    this.selectedService.set({ ...defaultService, ...JSON.parse(JSON.stringify(srv)) });
   }
 
   updateFeatures(val: string) {
@@ -4800,6 +5064,50 @@ export class AdminDashboard implements AfterViewInit, OnInit {
   removeServiceProcess(index: number) {
     if (this.selectedService() && this.selectedService()!.process) {
       this.selectedService()!.process.splice(index, 1);
+    }
+  }
+
+  addServiceBenefit() {
+    if (this.selectedService()) {
+      if (!this.selectedService()!.benefits) {
+        this.selectedService()!.benefits = [];
+      }
+      this.selectedService()!.benefits.push({ title: '', icon: 'check_circle', desc: '' });
+    }
+  }
+
+  removeServiceBenefit(index: number) {
+    if (this.selectedService() && this.selectedService()!.benefits) {
+      this.selectedService()!.benefits.splice(index, 1);
+    }
+  }
+
+  addServiceFAQ() {
+    if (this.selectedService()) {
+      if (!this.selectedService()!.faqs) {
+        this.selectedService()!.faqs = [];
+      }
+      this.selectedService()!.faqs.push({ q: '', a: '' });
+    }
+  }
+
+  removeServiceFAQ(index: number) {
+    if (this.selectedService() && this.selectedService()!.faqs) {
+      this.selectedService()!.faqs.splice(index, 1);
+    }
+  }
+
+  moveServiceProcessUp(index: number) {
+    if (this.selectedService() && this.selectedService()!.process && index > 0) {
+      const process = this.selectedService()!.process;
+      [process[index - 1], process[index]] = [process[index], process[index - 1]];
+    }
+  }
+
+  moveServiceProcessDown(index: number) {
+    if (this.selectedService() && this.selectedService()!.process && index < this.selectedService()!.process.length - 1) {
+      const process = this.selectedService()!.process;
+      [process[index + 1], process[index]] = [process[index], process[index + 1]];
     }
   }
 
@@ -4946,8 +5254,38 @@ export class AdminDashboard implements AfterViewInit, OnInit {
       this.adminServices.update(list => list.map(item => item.id === srv.id ? srv : item));
       this.addSystemNotification('Service Updated', `Service details for "${srv.title}" updated.`, 'edit', 'bg-slate-100 text-slate-600');
     }
+    
+    // Sync with WebsiteData
+    this.websiteData.update(data => {
+      const newData = { ...data };
+      if (!newData.services) {
+        newData.services = {
+          headerTitle: 'Our Services',
+          headerSubtitle: 'Comprehensive solutions for every need',
+          bannerImage: 'https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?q=80&w=2070&auto=format&fit=crop',
+          secondaryTitle: 'Custom Wiring & Installation',
+          secondaryDescription: 'Beyond solar panels, we specialize in complete wiring installation setups.',
+          serviceDetails: {}
+        };
+      }
+      if (!newData.services.serviceDetails) {
+        newData.services.serviceDetails = {};
+      }
+      newData.services.serviceDetails[srv.id] = {
+        title: srv.title,
+        icon: srv.icon,
+        image: srv.image,
+        longDescription: srv.longDescription || srv.description,
+        benefits: srv.benefits || [],
+        process: srv.process || [],
+        faqs: srv.faqs || []
+      };
+      return newData;
+    });
+
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem('blucid_services', JSON.stringify(this.adminServices()));
+      localStorage.setItem('blucid_website_content', JSON.stringify(this.websiteData()));
     }
     this.showServicePreview.set(false);
     this.selectedService.set(null);
@@ -4957,13 +5295,29 @@ export class AdminDashboard implements AfterViewInit, OnInit {
   deleteService() {
     const srv = this.selectedService();
     if (srv && srv.id) {
-      this.adminServices.update(list => list.filter(item => item.id !== srv.id));
-      if (isPlatformBrowser(this.platformId)) {
-        localStorage.setItem('blucid_services', JSON.stringify(this.adminServices()));
+      if (confirm(`Are you sure you want to delete the service "${srv.title}"? This action is irreversible and will remove it from the website.`)) {
+        this.adminServices.update(list => list.filter(item => item.id !== srv.id));
+        
+        // Remove from WebsiteData
+        this.websiteData.update(data => {
+           const newData = { ...data };
+           if (newData.services?.serviceDetails?.[srv.id]) {
+             delete newData.services.serviceDetails[srv.id];
+           }
+           return newData;
+        });
+
+        if (isPlatformBrowser(this.platformId)) {
+          localStorage.setItem('blucid_services', JSON.stringify(this.adminServices()));
+          localStorage.setItem('blucid_website_content', JSON.stringify(this.websiteData()));
+        }
+        this.addSystemNotification('Service Removed', `Service "${srv.title}" has been deleted from the system.`, 'delete_sweep', 'bg-rose-100 text-rose-600');
+        this.showNotification('Service successfully deleted!');
+        this.selectedService.set(null);
       }
-      this.addSystemNotification('Service Removed', `Service "${srv.title}" has been deleted from the system.`, 'delete_sweep', 'bg-rose-100 text-rose-600');
+    } else {
+      this.selectedService.set(null);
     }
-    this.selectedService.set(null);
   }
 
   // --- Products Management ---
@@ -5228,10 +5582,10 @@ export class AdminDashboard implements AfterViewInit, OnInit {
   }
 
   deleteServiceJob(id: number) {
-    if (confirm('Are you sure you want to delete this service job order?')) {
+    if (confirm(`Are you sure you want to delete service job order #${id}? This action is irreversible and will remove all scheduling data.`)) {
       this.adminServiceJobs.update(jobs => jobs.filter(j => j.id !== id));
       this.addSystemNotification('Job Order Cancelled', `Service job #${id} has been removed from the schedule.`, 'event_busy', 'bg-rose-100 text-rose-600');
-      this.showNotification('Service job deleted.');
+      this.showNotification('Service job successfully deleted!');
       this.selectedServiceJob.set(null);
     }
   }
@@ -5321,6 +5675,61 @@ export class AdminDashboard implements AfterViewInit, OnInit {
     this.isDraggingImages.set(false);
   }
 
+  activePreviewPolicy = signal<'privacy' | 'terms' | 'disclaimer' | 'cookie' | null>(null);
+
+  previewContent = computed(() => {
+    const type = this.activePreviewPolicy();
+    const data = this.websiteData()?.footer;
+    if (!type || !data) return { lastUpdated: '', paragraphs: [], fontSize: '14px', fontFamily: 'Arial' };
+
+    let text = '';
+    let lastUpdated = '';
+    let fontSize = '14px';
+    let fontFamily = 'Arial';
+
+    switch (type) {
+      case 'privacy':
+        text = data.privacyPolicy;
+        lastUpdated = data.privacyLastUpdated;
+        fontSize = data.privacyFontSize;
+        fontFamily = data.privacyFontFamily;
+        break;
+      case 'terms':
+        text = data.termsOfService;
+        lastUpdated = data.termsLastUpdated;
+        fontSize = data.termsFontSize;
+        fontFamily = data.termsFontFamily;
+        break;
+      case 'disclaimer':
+        text = data.disclaimer;
+        lastUpdated = data.disclaimerLastUpdated;
+        fontSize = data.disclaimerFontSize;
+        fontFamily = data.disclaimerFontFamily;
+        break;
+      case 'cookie':
+        text = data.cookiePolicy;
+        lastUpdated = data.cookieLastUpdated;
+        fontSize = data.cookieFontSize;
+        fontFamily = data.cookieFontFamily;
+        break;
+    }
+
+    return {
+      lastUpdated,
+      fontSize,
+      fontFamily,
+      paragraphs: text.split('\n').filter(p => p.trim().length > 0)
+    };
+  });
+
+  previewPolicy(type: 'privacy' | 'terms' | 'disclaimer' | 'cookie') {
+    this.activePreviewPolicy.set(type);
+  }
+
+  isHeader(text: string): boolean {
+    return /^\d+\.\s/.test(text.trim());
+  }
+
   onImageUpload(event: Event, contextType: 'service' | 'product' | 'website' | 'admin-project' | 'admin-avatar', index = 0, websiteTab = '', galleryIndex?: number) {
     const files = (event.target as HTMLInputElement).files;
     if (files && files.length > 0) {
@@ -5328,16 +5737,45 @@ export class AdminDashboard implements AfterViewInit, OnInit {
     }
   }
 
-  private handleMultipleFiles(files: FileList, contextType: 'service' | 'product' | 'website' | 'admin-project' | 'admin-avatar', index = 0, websiteTab = '', galleryIndex?: number) {
-    Array.from(files).forEach((file, i) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const base64string = e.target?.result as string;
-        const targetIndex = (contextType === 'product' && files.length > 1) ? index + i : index;
-        this.applyImageChange(base64string, contextType, targetIndex, websiteTab, galleryIndex);
-      };
-      reader.readAsDataURL(file);
-    });
+  private async handleMultipleFiles(files: FileList, contextType: 'service' | 'product' | 'website' | 'admin-project' | 'admin-avatar', index = 0, websiteTab = '', galleryIndex?: number) {
+    const fileArray = Array.from(files);
+    
+    for (let i = 0; i < fileArray.length; i++) {
+      const file = fileArray[i];
+      const targetIndex = (contextType === 'product' && files.length > 1) ? index + i : index;
+      
+      // Show mini progress notification for Supabase uploads
+      const isSupabaseConfigured = typeof SUPABASE_URL !== 'undefined' && SUPABASE_URL !== '';
+      if (isSupabaseConfigured) {
+         this.addSystemNotification('Uploading...', `Uploading ${file.name} to storage...`, 'cloud_upload', 'bg-blue-100 text-blue-600');
+      }
+
+      try {
+        const publicUrl = await uploadToSupabase(file);
+        
+        if (publicUrl) {
+          this.applyImageChange(publicUrl, contextType, targetIndex, websiteTab, galleryIndex);
+          this.addSystemNotification('Upload Complete', `${file.name} is now live.`, 'cloud_done', 'bg-emerald-100 text-emerald-600');
+        } else {
+          // Fallback to base64 if Supabase is not ready or fails
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const base64string = e.target?.result as string;
+            this.applyImageChange(base64string, contextType, targetIndex, websiteTab, galleryIndex);
+          };
+          reader.readAsDataURL(file);
+        }
+      } catch (err) {
+        console.error('Upload failed:', err);
+        // Last resort fallback
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const base64string = e.target?.result as string;
+          this.applyImageChange(base64string, contextType, targetIndex, websiteTab, galleryIndex);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
   }
 
   private applyImageChange(base64string: string, contextType: 'service' | 'product' | 'website' | 'admin-project' | 'admin-avatar', index = 0, websiteTab = '', galleryIndex?: number) {
@@ -5377,6 +5815,9 @@ export class AdminDashboard implements AfterViewInit, OnInit {
            if (anyData.home.testimonials[index]) {
              anyData.home.testimonials[index].image = base64string;
            }
+        } else if (websiteTab === 'portfolio') {
+           if (!anyData.portfolio) anyData.portfolio = {};
+           anyData.portfolio.bannerImage = base64string;
         } else if (websiteTab === 'home-brand') {
            if (!anyData.home.brands) anyData.home.brands = [];
            if (anyData.home.brands[index]) {

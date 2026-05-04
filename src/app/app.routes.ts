@@ -7,8 +7,10 @@ import {FAQ} from './faq';
 import {Products} from './products';
 import {ProductDetail} from './product-detail';
 import {Contact} from './contact';
+import {Portfolio} from './portfolio';
 import {AdminLogin} from './admin-login';
 import {AdminDashboard} from './admin-dashboard';
+import {SolarCalculator} from './solar-calculator';
 
 export const routes: Routes = [
   {path: '', component: Home},
@@ -18,7 +20,9 @@ export const routes: Routes = [
   {path: 'faq', component: FAQ},
   {path: 'products', component: Products},
   {path: 'products/:id', component: ProductDetail},
+  {path: 'portfolio', component: Portfolio},
   {path: 'contact', component: Contact},
+  {path: 'solar-calculator', component: SolarCalculator},
   {path: 'adminlogin', component: AdminLogin},
   {path: 'admindashboard', component: AdminDashboard},
   {path: '**', redirectTo: ''}

@@ -45,6 +45,27 @@ export class App {
           if (data.theme) {
             document.documentElement.style.setProperty('--primary-color', data.theme.primary);
             document.documentElement.style.setProperty('--secondary-color', data.theme.secondary);
+            
+            // Legacy mapping fallback
+            document.documentElement.style.setProperty('--color-primary', data.theme.primary);
+          }
+          if (data.system) {
+            if (data.system.typography) {
+              document.documentElement.style.setProperty('--sys-h1-font', `"${data.system.typography.h1Family}", sans-serif`);
+              document.documentElement.style.setProperty('--sys-h2-font', `"${data.system.typography.h2Family}", sans-serif`);
+              document.documentElement.style.setProperty('--sys-h3-font', `"${data.system.typography.h3Family}", sans-serif`);
+              document.documentElement.style.setProperty('--sys-h4-font', `"${data.system.typography.h4Family}", sans-serif`);
+              document.documentElement.style.setProperty('--sys-body-font', `"${data.system.typography.bodyFamily}", sans-serif`);
+              document.documentElement.style.setProperty('--sys-base-font-size', data.system.typography.baseFontSize);
+            }
+            if (data.system.colors) {
+              document.documentElement.style.setProperty('--sys-body-bg', data.system.colors.bodyBackground);
+              document.documentElement.style.setProperty('--sys-button-bg', data.system.colors.buttonBackground);
+              document.documentElement.style.setProperty('--color-primary', data.system.colors.buttonBackground);
+              document.documentElement.style.setProperty('--sys-footer-bg', data.system.colors.footerBackground);
+              document.documentElement.style.setProperty('--sys-header-bg', data.system.colors.headerBackground);
+              document.documentElement.style.setProperty('--sys-navbar-bg', data.system.colors.navbarBackground);
+            }
           }
           if (data.typography) {
             document.documentElement.style.setProperty('--font-sans-family', `"${data.typography.fontSans}", ui-sans-serif, system-ui, sans-serif`);

@@ -16,8 +16,8 @@ import {SeoService} from './seo';
       <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-50 z-0"></div>
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-        <h1 class="text-4xl lg:text-6xl font-display font-black text-primary mb-6">{{pageData().headerTitle}}</h1>
-        <p class="text-slate-800 max-w-2xl mx-auto">{{pageData().headerSubtitle}}</p>
+        <h1 class="text-primary mb-6" style="font-family: Arial; font-size: 40px; font-weight: bold;">{{pageData().headerTitle}}</h1>
+        <p class="text-slate-800 max-w-2xl mx-auto" style="font-size: 18px;">{{pageData().headerSubtitle}}</p>
       </div>
     </section>
 
@@ -41,7 +41,7 @@ import {SeoService} from './seo';
                 [style.max-height]="openIndex === i ? '500px' : '0'"
                 [style.padding-bottom]="openIndex === i ? '1.25rem' : '0'"
               >
-                <p class="text-slate-800 text-sm leading-relaxed">
+                <p class="text-sm leading-relaxed" style="font-size: 16px; color: #000000;">
                   {{item.a}}
                 </p>
               </div>
@@ -50,8 +50,8 @@ import {SeoService} from './seo';
         </div>
         
         <div class="mt-16 p-8 rounded-3xl bg-blue-50 border border-blue-100 text-center">
-          <h3 class="text-xl font-bold text-secondary mb-2">{{ pageData().ctaTitle || 'Still have questions?' }}</h3>
-          <p class="text-slate-800 mb-6">{{ pageData().ctaDescription || "Can't find the answer you're looking for? Please chat to our friendly team." }}</p>
+          <h3 class="text-xl font-bold mb-2" style="color: #224064;">{{ pageData().ctaTitle || 'Still have questions?' }}</h3>
+          <p class="mb-6" style="color: #000000; font-size: 18px;">{{ pageData().ctaDescription || "Can't find the answer you're looking for? Please chat to our friendly team." }}</p>
           <a [href]="'tel:' + pageData().ctaPhone" class="inline-flex items-center justify-center px-6 py-3 rounded-full bg-primary text-white font-bold hover:bg-primary-dark transition-all">
             Call Us Now
           </a>

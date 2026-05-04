@@ -1,30 +1,98 @@
 import {Component, inject} from '@angular/core';
 import {RouterLink, RouterLinkActive, Router} from '@angular/router';
 import {MatIconModule} from '@angular/material/icon';
-import {NgClass} from '@angular/common';
+import {WebsiteDataService} from './website-data';
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, RouterLinkActive, MatIconModule, NgClass],
+  imports: [RouterLink, RouterLinkActive, MatIconModule],
   template: `
-    <nav class="bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-0 z-50">
+    <nav class="backdrop-blur-md border-b border-slate-100 sticky top-0 z-50 transition-colors duration-300" 
+         [style.background-color]="websiteData().system.colors.navbarBackground + 'cc'">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-20">
           <div class="flex items-center">
             <a routerLink="/" (click)="scrollToTop()" class="flex items-center gap-2 group cursor-pointer">
               <div class="w-28 h-14 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
-                <img src="/img/nlogo.png" alt="Blucid Enterprise Logo" class="w-full h-full object-contain">
+                <img src="/img/nlogo.png" alt="Blucid Enterprise Logo" class="w-full h-full object-contain" style="width: 100.992px;">
               </div>
             </a>
           </div>
 
           <!-- Desktop Menu -->
           <div class="hidden md:flex items-center space-gap-8">
-            <a routerLink="/" (click)="scrollToTop()" routerLinkActive="text-primary" [routerLinkActiveOptions]="{exact: true}" class="text-sm font-medium text-slate-600 hover:text-primary transition-colors px-3 py-2 cursor-pointer">Home</a>
-            <a routerLink="/services" (click)="scrollToTop()" routerLinkActive="text-primary" class="text-sm font-medium text-slate-600 hover:text-primary transition-colors px-3 py-2 cursor-pointer">Services</a>
-            <a routerLink="/products" (click)="scrollToTop()" routerLinkActive="text-primary" class="text-sm font-medium text-slate-600 hover:text-primary transition-colors px-3 py-2 cursor-pointer">Products</a>
-            <a routerLink="/about" (click)="scrollToTop()" routerLinkActive="text-primary" class="text-sm font-medium text-slate-600 hover:text-primary transition-colors px-3 py-2 cursor-pointer">About Us</a>
-            <a routerLink="/faq" (click)="scrollToTop()" routerLinkActive="text-primary" class="text-sm font-medium text-slate-600 hover:text-primary transition-colors px-3 py-2 cursor-pointer">FAQ</a>
+            <!-- Products Dropdown -->
+            <div class="relative group">
+               <div class="text-sm font-medium text-black hover:text-primary transition-colors px-3 py-2 flex items-center gap-1 cursor-pointer">
+                 Products
+                 <mat-icon class="text-sm">keyboard_arrow_down</mat-icon>
+               </div>
+               <!-- Dropdown Panel -->
+               <div class="fixed top-20 left-[3vw] w-[94vw] h-auto bg-white shadow-xl rounded-2xl p-8 grid grid-cols-3 gap-8 border border-slate-100 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                 <a routerLink="/products" (click)="closeMenu(); scrollToTop()" class="text-black hover:text-primary p-8 hover:bg-slate-50 rounded-2xl flex flex-col items-start justify-start text-left border border-slate-100 transition-all duration-200">
+                   <span class="text-lg font-bold">Our Products</span>
+                   <p class="text-sm text-slate-500 mt-2">Browse our high-performance solar panels, inverters, and battery storage systems designed for longevity.</p>
+                 </a>
+                 <a routerLink="/services" (click)="closeMenu(); scrollToTop()" class="text-black hover:text-primary p-8 hover:bg-slate-50 rounded-2xl flex flex-col items-start justify-start text-left border border-slate-100 transition-all duration-200">
+                   <span class="text-lg font-bold">Kinds of Our Services</span>
+                   <p class="text-sm text-slate-500 mt-2">From residential installations to large-scale commercial solar farms, explore our comprehensive service range.</p>
+                 </a>
+                 <a routerLink="/contact" (click)="closeMenu(); scrollToTop()" class="text-black hover:text-primary p-8 hover:bg-slate-50 rounded-2xl flex flex-col items-start justify-start text-left border border-slate-100 transition-all duration-200">
+                   <span class="text-lg font-bold">Business Partnership</span>
+                   <p class="text-sm text-slate-500 mt-2">Collaborate with us to accelerate the green energy transition through strategic B2B solar initiatives.</p>
+                 </a>
+               </div>
+            </div>
+            <!-- Company Dropdown -->
+            <div class="relative group">
+               <div class="text-sm font-medium text-black hover:text-primary transition-colors px-3 py-2 flex items-center gap-1 cursor-pointer">
+                 Company
+                 <mat-icon class="text-sm">keyboard_arrow_down</mat-icon>
+               </div>
+               <!-- Dropdown Panel -->
+               <div class="fixed top-20 left-[3vw] w-[94vw] h-auto bg-white shadow-xl rounded-2xl p-8 grid grid-cols-3 gap-8 border border-slate-100 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                 <a routerLink="/about" (click)="closeMenu(); scrollToTop()" class="text-black hover:text-primary p-8 hover:bg-slate-50 rounded-2xl flex flex-col items-start justify-start text-left border border-slate-100 transition-all duration-200">
+                   <span class="text-lg font-bold">About Us</span>
+                   <p class="text-sm text-slate-500 mt-2">Learn about our history, mission, and the team driving our sustainable energy solutions.</p>
+                 </a>
+                 <a tabindex="0" (keydown.enter)="closeMenu(); navigateToWithFragment('/about', 'why-choose-us')" (click)="closeMenu(); navigateToWithFragment('/about', 'why-choose-us')" class="text-black hover:text-primary p-8 hover:bg-slate-50 rounded-2xl flex flex-col items-start justify-start text-left border border-slate-100 transition-all duration-200 cursor-pointer">
+                   <span class="text-lg font-bold">Why Choose Us</span>
+                   <p class="text-sm text-slate-500 mt-2">Discover what sets us apart and why thousands trust us for their solar energy needs.</p>
+                 </a>
+                 <a tabindex="0" (keydown.enter)="closeMenu(); navigateToWithFragment('/', 'testimonials')" (click)="closeMenu(); navigateToWithFragment('/', 'testimonials')" class="text-black hover:text-primary p-8 hover:bg-slate-50 rounded-2xl flex flex-col items-start justify-start text-left border border-slate-100 transition-all duration-200 cursor-pointer">
+                   <span class="text-lg font-bold">Client Testimonial</span>
+                   <p class="text-sm text-slate-500 mt-2">Read success stories and experiences from our satisfied residential and commercial clients.</p>
+                 </a>
+               </div>
+            </div>
+            
+            <!-- Learning Dropdown -->
+            <div class="relative group">
+               <div class="text-sm font-medium text-black hover:text-primary transition-colors px-3 py-2 flex items-center gap-1 cursor-pointer">
+                 Learn
+                 <mat-icon class="text-sm">keyboard_arrow_down</mat-icon>
+               </div>
+               <!-- Dropdown Panel -->
+               <div class="fixed top-20 left-[3vw] w-[94vw] h-[74vh] bg-white shadow-xl rounded-2xl p-8 grid grid-cols-2 gap-8 border border-slate-100 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                 <a routerLink="/portfolio" (click)="closeMenu(); scrollToTop()" class="text-black hover:text-primary p-8 hover:bg-slate-50 rounded-2xl flex flex-col items-start justify-start text-left border border-slate-100 transition-all duration-200">
+                   <span class="text-lg font-bold">Our Portfolio</span>
+                   <p class="text-sm text-slate-500 mt-2">Explore our completed projects and witness our commitment to quality and sustainability.</p>
+                 </a>
+                 <a routerLink="/services" (click)="closeMenu(); scrollToTop()" class="text-black hover:text-primary p-8 hover:bg-slate-50 rounded-2xl flex flex-col items-start justify-start text-left border border-slate-100 transition-all duration-200">
+                   <span class="text-lg font-bold">Our Expertise</span>
+                   <p class="text-sm text-slate-500 mt-2">Discover the specialized skills and solar technologies that drive our innovative energy solutions.</p>
+                 </a>
+                 <a routerLink="/solar-calculator" (click)="closeMenu(); scrollToTop()" class="text-black hover:text-primary p-8 hover:bg-slate-50 rounded-2xl flex flex-col items-start justify-start text-left border border-slate-100 transition-all duration-200">
+                   <span class="text-lg font-bold">Solar Calculator</span>
+                   <p class="text-sm text-slate-500 mt-2">Calculate uses of real-market data and switch to Solar Power.</p>
+                 </a>
+                 <a routerLink="/faq" (click)="closeMenu(); scrollToTop()" class="text-black hover:text-primary p-8 hover:bg-slate-50 rounded-2xl flex flex-col items-start justify-start text-left border border-slate-100 transition-all duration-200">
+                   <span class="text-lg font-bold">FAQ</span>
+                   <p class="text-sm text-slate-500 mt-2">Find answers to the most common questions about switching to solar energy and our services.</p>
+                 </a>
+               </div>
+            </div>
+
             <a routerLink="/contact" (click)="scrollToTop()" class="ml-4 inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-semibold rounded-full shadow-sm text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all cursor-pointer">
               Contact Us
             </a>
@@ -39,85 +107,39 @@ import {NgClass} from '@angular/common';
         </div>
       </div>
 
-      <!-- Left Slide-out Mobile Sidebar Panel -->
-      <div class="md:hidden">
-        <!-- Backdrop -->
-        @if (isMenuOpen) {
-          <div 
-            class="fixed inset-0 bg-secondary/60 backdrop-blur-sm z-[998] transition-opacity duration-300 cursor-pointer"
-            (click)="toggleMenu()"
-            (keydown.enter)="toggleMenu()"
-            tabindex="0"
-            role="button"
-            aria-label="Close menu"
-          ></div>
-        }
-
-        <!-- Sidebar Content -->
-        <div 
-          class="fixed top-0 left-0 h-full w-[80%] max-w-xs bg-white shadow-2xl z-[999] transition-transform duration-300 ease-out transform"
-          [ngClass]="isMenuOpen ? 'translate-x-0' : '-translate-x-full'"
-        >
-          <div class="h-full flex flex-col">
-            <!-- Sidebar Header -->
-            <div class="p-8 border-b border-slate-50 relative flex flex-col items-center bg-white">
-              <button (click)="toggleMenu()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-primary transition-colors">
-                <mat-icon>close</mat-icon>
-              </button>
-              <a routerLink="/" (click)="closeMenu(); scrollToTop()" class="flex flex-col items-center gap-3 cursor-pointer">
-                <div class="w-32 h-16 flex items-center justify-center overflow-hidden">
-                  <img src="/img/nlogo.png" alt="Blucid Logo" class="w-full h-full object-contain">
-                </div>
-                <span class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-center">Blucid Enterprise Inc.</span>
-              </a>
-            </div>
-
-            <!-- Sidebar Links -->
-            <nav class="flex-grow p-6 space-y-4 bg-white">
-              <a routerLink="/" (click)="closeMenu(); scrollToTop()" routerLinkActive="text-primary bg-primary/5" [routerLinkActiveOptions]="{exact: true}" class="flex items-center gap-4 px-4 py-3 rounded-2xl text-slate-600 font-bold hover:text-primary hover:bg-primary/5 transition-all cursor-pointer">
-                <mat-icon class="text-xl">home</mat-icon>
-                <span>Home</span>
-              </a>
-              <a routerLink="/" fragment="roi-calculator" (click)="scrollToSection('roi-calculator'); closeMenu()" class="flex items-center gap-4 px-4 py-3 rounded-2xl text-slate-600 font-bold hover:text-primary hover:bg-primary/5 transition-all cursor-pointer">
-                <mat-icon class="text-xl">calculate</mat-icon>
-                <span>Solar Calculator</span>
-              </a>
-              <a routerLink="/services" (click)="closeMenu(); scrollToTop()" routerLinkActive="text-primary bg-primary/5" class="flex items-center gap-4 px-4 py-3 rounded-2xl text-slate-600 font-bold hover:text-primary hover:bg-primary/5 transition-all cursor-pointer">
-                <mat-icon class="text-xl">engineering</mat-icon>
-                <span>Services</span>
-              </a>
-              <a routerLink="/products" (click)="closeMenu(); scrollToTop()" routerLinkActive="text-primary bg-primary/5" class="flex items-center gap-4 px-4 py-3 rounded-2xl text-slate-600 font-bold hover:text-primary hover:bg-primary/5 transition-all cursor-pointer">
-                <mat-icon class="text-xl">shopping_cart</mat-icon>
-                <span>Products</span>
-              </a>
-              <a routerLink="/about" (click)="closeMenu(); scrollToTop()" routerLinkActive="text-primary bg-primary/5" class="flex items-center gap-4 px-4 py-3 rounded-2xl text-slate-600 font-bold hover:text-primary hover:bg-primary/5 transition-all cursor-pointer">
-                <mat-icon class="text-xl">info</mat-icon>
-                <span>About Us</span>
-              </a>
-              <a routerLink="/faq" (click)="closeMenu(); scrollToTop()" routerLinkActive="text-primary bg-primary/5" class="flex items-center gap-4 px-4 py-3 rounded-2xl text-slate-600 font-bold hover:text-primary hover:bg-primary/5 transition-all cursor-pointer">
-                <mat-icon class="text-xl">help</mat-icon>
-                <span>FAQ</span>
-              </a>
-            </nav>
-
-            <!-- Sidebar Footer -->
-            <div class="p-6 border-t border-slate-50 bg-white">
-              <a routerLink="/contact" (click)="closeMenu(); scrollToTop()" class="w-full inline-flex items-center justify-center px-6 py-4 rounded-2xl bg-primary text-white font-black shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer">
-                Get Free Quote
-              </a>
-              <div class="mt-6 text-center">
-                <p class="text-[10px] font-black text-slate-800 uppercase tracking-widest">Connect with our team</p>
-                <div class="flex justify-center gap-4 mt-3">
-                  <a href="https://www.facebook.com/search/top/?q=blucid%20enterprise%20inc." target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-full bg-white border border-slate-100 text-slate-400 flex items-center justify-center hover:bg-primary/10 hover:text-primary cursor-pointer transition-all">
-                    <mat-icon class="text-sm">facebook</mat-icon>
-                  </a>
-                  <span class="w-8 h-8 rounded-full bg-white border border-slate-100 text-slate-400 flex items-center justify-center hover:bg-primary/10 hover:text-primary cursor-pointer transition-all"><mat-icon class="text-sm">alternate_email</mat-icon></span>
-                </div>
-              </div>
-            </div>
-          </div>
+      <!-- Mobile menu dropdown -->
+      @if (isMenuOpen) {
+        <div class="md:hidden absolute top-full left-0 w-full bg-white border-b border-slate-100 shadow-xl z-[999] animate-in slide-in-from-top-4 fade-in duration-200">
+          <!-- Sidebar Links -->
+          <nav class="p-4 space-y-2">
+            <a routerLink="/products" (click)="closeMenu(); scrollToTop()" routerLinkActive="text-primary bg-primary/5" class="flex items-center gap-4 px-4 py-3 rounded-2xl text-black font-bold hover:text-primary hover:bg-primary/5 transition-all cursor-pointer">
+              <mat-icon class="text-xl">shopping_cart</mat-icon>
+              <span class="text-sm">Products</span>
+            </a>
+            <a routerLink="/services" (click)="closeMenu(); scrollToTop()" routerLinkActive="text-primary bg-primary/5" class="flex items-center gap-4 px-4 py-3 rounded-2xl text-black font-bold hover:text-primary hover:bg-primary/5 transition-all cursor-pointer">
+              <mat-icon class="text-xl">engineering</mat-icon>
+              <span class="text-sm">Services</span>
+            </a>
+            <a routerLink="/portfolio" (click)="closeMenu(); scrollToTop()" routerLinkActive="text-primary bg-primary/5" class="flex items-center gap-4 px-4 py-3 rounded-2xl text-black font-bold hover:text-primary hover:bg-primary/5 transition-all cursor-pointer">
+              <mat-icon class="text-xl">work</mat-icon>
+              <span class="text-sm">Portfolio</span>
+            </a>
+            <a routerLink="/solar-calculator" (click)="closeMenu(); scrollToTop()" routerLinkActive="text-primary bg-primary/5" class="flex items-center gap-4 px-4 py-3 rounded-2xl text-black font-bold hover:text-primary hover:bg-primary/5 transition-all cursor-pointer">
+              <mat-icon class="text-xl">calculate</mat-icon>
+              <span class="text-sm">Solar Calculator</span>
+            </a>
+            <a routerLink="/faq" (click)="closeMenu(); scrollToTop()" routerLinkActive="text-primary bg-primary/5" class="flex items-center gap-4 px-4 py-3 rounded-2xl text-black font-bold hover:text-primary hover:bg-primary/5 transition-all cursor-pointer">
+              <mat-icon class="text-xl">help_outline</mat-icon>
+              <span class="text-sm">FAQ</span>
+            </a>
+            <div class="border-t border-slate-100 my-2"></div>
+            <a routerLink="/about" (click)="closeMenu(); scrollToTop()" routerLinkActive="text-primary bg-primary/5" class="flex items-center gap-4 px-4 py-3 rounded-2xl text-black font-bold hover:text-primary hover:bg-primary/5 transition-all cursor-pointer">
+              <mat-icon class="text-xl">business</mat-icon>
+              <span class="text-sm">Company</span>
+            </a>
+          </nav>
         </div>
-      </div>
+      }
     </nav>
   `,
   styles: [`
@@ -127,6 +149,7 @@ import {NgClass} from '@angular/common';
 })
 export class Navbar {
   private router = inject(Router);
+  websiteData = inject(WebsiteDataService).data;
   isMenuOpen = false;
 
   toggleMenu() {
@@ -160,6 +183,17 @@ export class Navbar {
     });
   }
 
+  navigateToWithFragment(path: string, fragmentId: string) {
+    this.router.navigate([path], { fragment: fragmentId }).then(() => {
+      setTimeout(() => {
+        const element = document.getElementById(fragmentId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100); // give time for route to transition and render
+    });
+  }
+
   scrollToSection(sectionId: string) {
     const currentUrl = this.router.url.split('#')[0];
     if (currentUrl === '/' || currentUrl === '/home') {
@@ -179,4 +213,3 @@ export class Navbar {
     }
   }
 }
-

@@ -11,13 +11,15 @@ import {SeoService} from './seo';
     <section class="pt-20 pb-12 bg-slate-50 relative overflow-hidden">
       <!-- Banner Image -->
       <div class="absolute inset-0 z-0 opacity-20">
-        <img [src]="pageData().bannerImage" alt="" class="w-full h-full object-cover">
+        @if (pageData().bannerImage) {
+          <img [src]="pageData().bannerImage" alt="" class="w-full h-full object-cover">
+        }
       </div>
       <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-50 z-0"></div>
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-        <h1 class="text-4xl lg:text-6xl font-display font-black text-primary mb-6">{{pageData().headerTitle}}</h1>
-        <p class="text-slate-800 max-w-2xl mx-auto">{{pageData().headerSubtitle}}</p>
+        <h1 class="text-primary mb-6" style="text-align: center; font-family: Arial; font-size: 40px; font-weight: bold;">{{pageData().headerTitle || 'Our Services'}}</h1>
+        <p class="text-slate-800 max-w-2xl mx-auto" style="font-family: Arial; font-weight: normal; font-size: 18px;">{{pageData().headerSubtitle}}</p>
       </div>
     </section>
 
@@ -56,8 +58,8 @@ import {SeoService} from './seo';
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="lg:grid lg:grid-cols-2 lg:gap-20 items-center">
           <div>
-            <h2 class="text-3xl lg:text-5xl font-display font-black mb-8 text-primary">{{ pageData().secondaryTitle || 'Custom Wiring & Installation' }}</h2>
-            <p class="text-slate-800 text-lg mb-10 leading-relaxed">
+            <h2 class="mb-8 text-primary" style="font-family: Arial; font-size: 40px; font-weight: bold;">{{ pageData().secondaryTitle || 'Custom Wiring & Installation' }}</h2>
+            <p class="text-lg mb-10 leading-relaxed" style="color: #040404;">
               {{ pageData().secondaryDescription || "Beyond solar panels, we specialize in complete wiring installation setups. Whether it's a new building or a retrofit, our team ensures your electrical infrastructure is robust, safe, and ready for high-efficiency energy." }}
             </p>
             <div class="space-y-6">
@@ -67,7 +69,7 @@ import {SeoService} from './seo';
                 </div>
                 <div>
                   <h4 class="text-xl font-bold mb-2 text-secondary">Volt Switch Panels</h4>
-                  <p class="text-slate-800 text-sm">Advanced control panels for precise energy management and distribution.</p>
+                  <p class="text-slate-800" style="font-size: 16px;">Advanced control panels for precise energy management and distribution.</p>
                 </div>
               </div>
               <div class="flex gap-6">
@@ -76,7 +78,7 @@ import {SeoService} from './seo';
                 </div>
                 <div>
                   <h4 class="text-xl font-bold mb-2 text-secondary">Battery Storage Solutions</h4>
-                  <p class="text-slate-800 text-sm">High-capacity battery banks to store your solar energy for night use or backup.</p>
+                  <p class="text-slate-800" style="font-size: 16px;">High-capacity battery banks to store your solar energy for night use or backup.</p>
                 </div>
               </div>
             </div>
@@ -161,7 +163,7 @@ export class Services implements OnInit {
         try {
           const parsed = JSON.parse(websiteDraft);
           if (parsed && parsed.services) {
-            this.pageData.set(parsed.services);
+            this.pageData.update(d => ({...d, ...parsed.services}));
           }
         } catch { /* ignore */ }
       } else {
@@ -170,7 +172,7 @@ export class Services implements OnInit {
           try {
             const parsed = JSON.parse(websiteContent);
             if (parsed && parsed.services) {
-              this.pageData.set(parsed.services);
+              this.pageData.update(d => ({...d, ...parsed.services}));
             }
           } catch { /* ignore */ }
         }
